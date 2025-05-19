@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import MobileNav from "./MobileNav";
 
 const Header = () => {
   return (
@@ -10,7 +11,9 @@ const Header = () => {
         >
           QuickMunch
         </Link>
-
+        <div className="md:hidden">
+          <MobileNav />
+        </div>
       </div>
     </div>
   );
