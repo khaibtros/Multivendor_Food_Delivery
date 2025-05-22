@@ -1,6 +1,6 @@
 import { Navigate, Route, Routes } from "react-router-dom";
 import Layout from "./layouts/layout";
-
+import HomePage from "./pages/HomePage";
 const AppRoutes = () => {
   return (
     <Routes>
@@ -8,7 +8,7 @@ const AppRoutes = () => {
         path="/"
         element={
           <Layout>
-            Home page
+            <HomePage />
           </Layout>
         }
       />

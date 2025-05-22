@@ -1,5 +1,5 @@
 import React from "react";
-import CheckIcon from "../../../assets/icons/CheckIcon.svg";
+import CheckIcon from "../../assets/icons/CheckIcon.svg";
 
 interface TickProps {
   heading: string;

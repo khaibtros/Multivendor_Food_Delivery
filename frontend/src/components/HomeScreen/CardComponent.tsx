@@ -1,9 +1,8 @@
-import React from "react";
 import Tick from "./Tick"; 
 
-import CustomerIcon from "../../../assets/icons/CustomerIcon.svg";
-import RestaurantIcon from "../../../assets/icons/RestuarantIcon.svg";
-import RiderIcon from "../../../assets/icons/RiderIcon.svg";
+import CustomerIcon from "../../assets/icons/CustomerIcon.svg";
+import RestaurantIcon from "../../assets/icons/RestuarantIcon.svg";
+import RiderIcon from "../../assets/icons/RiderIcon.svg";
 
 type TickItem = {
   heading: string;
