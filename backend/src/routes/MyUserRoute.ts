@@ -1,9 +1,8 @@
-import express from "express";
-import MyUserController from "../Controller/MyUserController";
-
+import express, { RequestHandler } from "express";
+import MyUserController from "../controllers/MyUserController";
 
 const router = express.Router();
-
-router.post("/", MyUserController.createCurrentUser);
+// /api/my/user
+router.get("/", MyUserController.createCurrentUser as RequestHandler);
 
 export default router;
