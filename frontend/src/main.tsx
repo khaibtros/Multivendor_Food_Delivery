@@ -1,5 +1,6 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
+import { Toaster } from "react-hot-toast";
 
 import "./global.css";
 import { BrowserRouter as Router } from "react-router-dom";
@@ -21,7 +22,7 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
       <QueryClientProvider client={queryClient}>
         <Auth0ProviderWithNavigate>
           <AppRoutes />
-          <Toaster visibleToasts={1} position="top-right" richColors />
+          <Toaster position="top-right" />
         </Auth0ProviderWithNavigate>
       </QueryClientProvider>
     </Router>
