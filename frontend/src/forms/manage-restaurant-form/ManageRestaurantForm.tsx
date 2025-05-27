@@ -65,9 +65,7 @@ const ManageRestaurantForm = ({ onSave, isLoading, restaurant }: Props) => {
     },
   });
 
-  const onSubmit = (formDataJson: RestaurantFormData) => {
-   
-  };
+  const onSubmit = (formDataJson: RestaurantFormData) => {};
 
   return (
     <Form {...form}>
@@ -75,6 +73,7 @@ const ManageRestaurantForm = ({ onSave, isLoading, restaurant }: Props) => {
         onSubmit={form.handleSubmit(onSubmit)}
         className="space-y-8 bg-gray-50 p-10 rounded-lg"
       >
+        <DetailsSection />
       </form>
     </Form>
   );
