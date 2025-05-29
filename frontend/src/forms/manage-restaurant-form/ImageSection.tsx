@@ -29,6 +29,7 @@ const ImageSection = () => {
           <AspectRatio ratio={16 / 9}>
             <img
               src={existingImageUrl}
+              alt=""
               className="rounded-md object-cover h-full w-full"
             />
           </AspectRatio>
