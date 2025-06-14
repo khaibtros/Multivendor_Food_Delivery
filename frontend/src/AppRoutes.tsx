@@ -2,12 +2,27 @@ import { Navigate, Route, Routes } from "react-router-dom";
 import Layout from "./layouts/layout";
 import HomePage from "./pages/HomePage";
 import AuthCallbackPage from "./pages/AuthCallbackPage";
-import UserProfilePage from "./pages/UserProfilePage";
-import ProtectedRoute from "./auth/ProtectedRoute";
+import UserProfilePage from "@/pages/UserProfilePage";
+import { AdminProtectedRoute, ManagerProtectedRoute, ProtectedRoute, SellerProtectedRoute } from "./auth/ProtectedRoute";
 import ManageRestaurantPage from "./pages/ManageRestaurantPage";
-import SearchPage from "./pages/SeacrchPage";
+import SearchPage from "./pages/SearchPage";
 import DetailPage from "./pages/DetailPage";
 import OrderStatusPage from "./pages/OrderStatusPage";
+import AdminLoginPage from "./pages/admin/AdminLoginPage";
+import AdminDashboardPage from "./pages/admin/AdminDashboardPage";
+import RestaurantApprovalsPage from "./pages/admin/RestaurantApprovalsPage";
+import ManagerDashboardPage from "./pages/manager/ManagerDashboardPage";
+import ManagerLoginPage from "./pages/manager/ManagerLoginPage";
+import SellerLoginPage from "./pages/seller/SellerLoginPage";
+import SellerDashboardPage from "./pages/seller/SellerDashboardPage";
+import DashboardLayout from "./layouts/ManagerLayout";
+import SellerLayout from "./layouts/SellerLayout";
+import ManageSellersPage from "@/pages/manager/ManageSellersPage";
+import ShipperLoginPage from "@/pages/shipper/ShipperLoginPage";
+import ShipperDashboardPage from "@/pages/shipper/ShipperDashboardPage";
+import ShipperProtectedRoute from "@/auth/ShipperProtectedRoute";
+import ManageShippersPage from "@/pages/manager/ManageShippersPage";
+
 const AppRoutes = () => {
   return (
     <Routes>
@@ -20,6 +35,78 @@ const AppRoutes = () => {
         }
       />
       <Route path="/auth-callback" element={<AuthCallbackPage />} />
+      
+      {/* Admin Routes */}
+      <Route path="/admin" element={<AdminLoginPage />} />
+      <Route element={<AdminProtectedRoute />}>
+        <Route path="/admin/dashboard" element={<AdminDashboardPage />} />
+        <Route path="/admin/restaurant-approvals" element={<RestaurantApprovalsPage />} />
+      </Route>
+      
+      {/* Manager Routes */}
+      <Route path="/manager" element={<ManagerLoginPage />} />
+      <Route element={<ManagerProtectedRoute />}>
+        <Route
+          path="/manager/dashboard/:restaurantId"
+          element={
+            <DashboardLayout>
+              <ManagerDashboardPage />
+            </DashboardLayout>
+          }
+        />
+        <Route
+          path="/manager/sellers"
+          element={
+            <DashboardLayout>
+              <ManageSellersPage />
+            </DashboardLayout>
+          }
+        />
+        <Route
+          path="/manager/shippers"
+          element={
+            <DashboardLayout>
+              <ManageShippersPage />
+            </DashboardLayout>
+          }
+        />
+      </Route>
+
+      {/* Seller Routes */}
+      <Route path="/seller" element={<SellerLoginPage />} />
+      <Route element={<SellerProtectedRoute />}>
+        <Route
+          path="/seller/dashboard/:restaurantId"
+          element={
+            <SellerLayout>
+              <SellerDashboardPage />
+            </SellerLayout>
+          }
+        />
+      </Route>
+
+      {/* Shipper Routes */}
+      <Route path="/shipper" element={<ShipperLoginPage />} />
+      <Route element={<ShipperProtectedRoute />}>
+        <Route
+          path="/shipper/dashboard/:restaurantId"
+          element={
+            <SellerLayout>
+              <ShipperDashboardPage />
+            </SellerLayout>
+          }
+        />
+      </Route>
+
+      {/* Public Routes */}
+      <Route
+        path="/search/:city"
+        element={
+          <Layout showHero={false}>
+            <SearchPage />
+          </Layout>
+        }
+      />
       <Route
         path="/detail/:restaurantId"
         element={
@@ -28,8 +115,10 @@ const AppRoutes = () => {
           </Layout>
         }
       />
+
+      {/* User Routes */}
       <Route element={<ProtectedRoute />}>
-      <Route
+        <Route
           path="/order-status"
           element={
             <Layout>
