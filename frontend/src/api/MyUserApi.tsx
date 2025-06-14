@@ -1,4 +1,4 @@
-import { User } from "@/types";
+import { User } from "@/types/index";
 import { useAuth0 } from "@auth0/auth0-react";
 import { useMutation, useQuery } from "react-query";
 import { toast } from "sonner";
@@ -125,4 +125,36 @@ export const useUpdateMyUser = () => {
   }
 
   return { updateUser, isLoading };
+};
+
+interface CurrentUser {
+  _id: string;
+  email: string;
+  role: "user" | "manager" | "admin";
+}
+
+export const useGetCurrentUser = () => {
+  const { getAccessTokenSilently } = useAuth0();
+
+  const getCurrentUserRequest = async () => {
+    const accessToken = await getAccessTokenSilently();
+    const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/my/user`, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error("Failed to get current user");
+    }
+
+    return response.json();
+  };
+
+  const { data: currentUser, isLoading } = useQuery<CurrentUser>({
+    queryKey: ["getCurrentUser"],
+    queryFn: getCurrentUserRequest,
+  });
+
+  return { currentUser, isLoading };
 };

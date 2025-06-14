@@ -1,15 +1,16 @@
-import { Restaurant } from "@/types";
+import { SearchState } from "@/pages/SearchPage";
+import { Restaurant, RestaurantSearchResponse } from "@/types/index";
 import { useQuery } from "react-query";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
-export const useGetRestaurant = (restaurant?: string)=> {
+export const useGetRestaurant = (restaurantId?: string) => {
   const getRestaurantByIdRequest = async (): Promise<Restaurant> => {
     const response = await fetch(
-      `${API_BASE_URL}/api/restaurant/${restaurant}`
+      `${API_BASE_URL}/api/restaurant/${restaurantId}`
     );
 
-    if(!response.ok) {
+    if (!response.ok) {
       throw new Error("Failed to get restaurant");
     }
 
@@ -17,47 +18,46 @@ export const useGetRestaurant = (restaurant?: string)=> {
   };
 
   const { data: restaurant, isLoading } = useQuery(
-    "fetchRestaurant", 
+    "fetchRestaurant",
     getRestaurantByIdRequest,
     {
-      enable: !!restaurantId,
+      enabled: !!restaurantId,
     }
   );
 
-  return { restaurant, isLoading};
+  return { restaurant, isLoading };
 };
- 
+
 export const useSearchRestaurants = (
-    searchState: SearchState,
-    city?: string
-  ) => {
-    const createSearchRequest = async (): Promise<RestaurantSearchResponse> => {
-      const params = new URLSearchParams();
-      params.set("searchQuery", searchState.searchQuery);
-      params.set("page", searchState.page.toString());
-      params.set("selectedCuisines", searchState.selectedCuisines.join(","));
-      params.set("sortOption", searchState.sortOption);
-  
-      const response = await fetch(
-        `${API_BASE_URL}/api/restaurant/search/${city}?${params.toString()}`
-      );
-  
-      if (!response.ok) {
-        throw new Error("Failed to get restaurant");
-      }
-  
-      return response.json();
-    };
-  
-    const { data: results, isLoading } = useQuery(
-      ["searchRestaurants", searchState],
-      createSearchRequest,
-      { enabled: !!city }
+  searchState: SearchState,
+  city?: string
+) => {
+  const createSearchRequest = async (): Promise<RestaurantSearchResponse> => {
+    const params = new URLSearchParams();
+    params.set("searchQuery", searchState.searchQuery);
+    params.set("page", searchState.page.toString());
+    params.set("selectedCuisines", searchState.selectedCuisines.join(","));
+    params.set("sortOption", searchState.sortOption);
+
+    const response = await fetch(
+      `${API_BASE_URL}/api/restaurant/search/${city}?${params.toString()}`
     );
-  
-    return {
-      results,
-      isLoading,
-    };
+
+    if (!response.ok) {
+      throw new Error("Failed to get restaurant");
+    }
+
+    return response.json();
   };
-  
+
+  const { data: results, isLoading } = useQuery(
+    ["searchRestaurants", searchState],
+    createSearchRequest,
+    { enabled: !!city }
+  );
+
+  return {
+    results,
+    isLoading,
+  };
+};

@@ -8,6 +8,9 @@ declare global {
     interface Request {
       userId: string;
       auth0Id: string;
+      user: {
+        role: string;
+      };
     }
   }
 }
@@ -44,6 +47,7 @@ export const jwtParse = async (
 
     req.auth0Id = auth0Id as string;
     req.userId = user._id.toString();
+    req.user = { role: user.role };
     next();
   } catch (error) {
     return res.sendStatus(401);

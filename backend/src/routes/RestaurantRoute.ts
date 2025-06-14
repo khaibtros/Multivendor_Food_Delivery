@@ -1,27 +1,36 @@
-import express from 'express';
-import { param } from "express-validator";
-import RestaurantController from '../controllers/RestaurantController';
+import express from "express";
+import {
+  getRestaurants,
+  getPendingRestaurants,
+  createRestaurant,
+  approveRestaurant,
+  rejectRestaurant,
+  getRestaurantById,
+  updateRestaurant,
+  deleteRestaurant,
+  searchRestaurant,
+} from "../controllers/RestaurantController";
+import { jwtCheck, jwtParse } from "../middleware/auth";
+import { checkRole } from "../middleware/checkRole";
 
 const router = express.Router();
 
-router.get("/:restaurantId", 
-       param("restaurantId")
-      .isString()
-      .trim()
-      .notEmpty()
-      .withMessage("RestaurantId paramenter must be a valid string")
-      RestaurantController.getRestaurant
-    );
+// Public routes
+router.get("/search/:city", searchRestaurant);
+router.get("/", getRestaurants);
+router.get("/:restaurantId", getRestaurantById);
 
+// Protected routes (require authentication)
+router.use(jwtCheck, jwtParse);
 
-router.get(
-    "/search/:city",
-    param("city")
-      .isString()
-      .trim()
-      .notEmpty()
-      .withMessage("City paramenter must be a valid string"),
-    RestaurantController.searchRestaurant
-  );
+// Admin only routes
+router.get("/admin/pending", checkRole("admin"), getPendingRestaurants);
+router.post("/admin/:restaurantId/approve", checkRole("admin"), approveRestaurant);
+router.post("/admin/:restaurantId/reject", checkRole("admin"), rejectRestaurant);
 
-  export default router;
+// Manager routes
+router.post("/", createRestaurant);
+router.put("/:restaurantId", updateRestaurant);
+router.delete("/:restaurantId", deleteRestaurant);
+
+export default router;

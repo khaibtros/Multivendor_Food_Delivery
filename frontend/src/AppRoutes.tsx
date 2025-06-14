@@ -3,7 +3,7 @@ import Layout from "./layouts/layout";
 import HomePage from "./pages/HomePage";
 import AuthCallbackPage from "./pages/AuthCallbackPage";
 import UserProfilePage from "@/pages/UserProfilePage";
-import { AdminProtectedRoute, ManagerProtectedRoute, ProtectedRoute, SellerProtectedRoute } from "./auth/ProtectedRoute";
+import { AdminProtectedRoute, ManagerProtectedRoute, ProtectedRoute, SellerProtectedRoute, ShipperProtectedRoute } from "./auth/ProtectedRoute";
 import ManageRestaurantPage from "./pages/ManageRestaurantPage";
 import SearchPage from "./pages/SearchPage";
 import DetailPage from "./pages/DetailPage";
@@ -20,7 +20,6 @@ import SellerLayout from "./layouts/SellerLayout";
 import ManageSellersPage from "@/pages/manager/ManageSellersPage";
 import ShipperLoginPage from "@/pages/shipper/ShipperLoginPage";
 import ShipperDashboardPage from "@/pages/shipper/ShipperDashboardPage";
-import ShipperProtectedRoute from "@/auth/ShipperProtectedRoute";
 import ManageShippersPage from "@/pages/manager/ManageShippersPage";
 
 const AppRoutes = () => {

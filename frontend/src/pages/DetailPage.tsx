@@ -6,7 +6,7 @@ import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { Card, CardFooter } from "@/components/ui/card";
 import { useState } from "react";
 import { useParams } from "react-router-dom";
-import { MenuItem as MenuItemType } from "../types";
+import { MenuItem as MenuItemType } from "../types/index";
 import CheckoutButton from "@/components/CheckoutButton";
 import { UserFormData } from "@/forms/user-profile-form/UserProfileForm";
 import { useCreateCheckoutSession } from "@/api/OrderApi";
