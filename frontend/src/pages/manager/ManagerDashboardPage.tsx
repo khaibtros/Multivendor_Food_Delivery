@@ -2,7 +2,7 @@
 
 import { useEffect } from "react"
 import { useNavigate, useParams } from "react-router-dom"
-import { DollarSign, Package, Activity, TrendingUp, Users } from "lucide-react"
+import { DollarSign, Package, TrendingUp, Users } from "lucide-react"
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -11,20 +11,18 @@ import { Button } from "@/components/ui/button"
 import {
   useGetManagerRestaurant,
   useGetRestaurantStats,
-  useGetRestaurantActivity,
+  useGetRestaurantOrders,
+  useGetRestaurantCustomers,
 } from "@/api/manager/ManagerApi"
 
 const ManagerDashboardPage = () => {
   const navigate = useNavigate()
   const { restaurantId } = useParams()
 
-  const { data: managerData, isLoading: isLoadingManager } =
-    useGetManagerRestaurant()
-  const { data: stats, isLoading: isLoadingStats } = useGetRestaurantStats(
-    restaurantId || ""
-  )
-  const { data: activities, isLoading: isLoadingActivity } =
-    useGetRestaurantActivity(restaurantId || "")
+  const { data: managerData, isLoading: isLoadingManager } = useGetManagerRestaurant()
+  const { data: stats, isLoading: isLoadingStats } = useGetRestaurantStats()
+  const { data: orders, isLoading: isLoadingOrders } = useGetRestaurantOrders()
+  const { data: customers, isLoading: isLoadingCustomers } = useGetRestaurantCustomers()
 
   useEffect(() => {
     if (!isLoadingManager && !managerData) {
@@ -36,7 +34,7 @@ const ManagerDashboardPage = () => {
     }
   }, [isLoadingManager, managerData, navigate, restaurantId])
 
-  if (isLoadingManager || isLoadingStats || isLoadingActivity) {
+  if (isLoadingManager || isLoadingStats || isLoadingOrders || isLoadingCustomers) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="text-center space-y-4">
@@ -58,6 +56,11 @@ const ManagerDashboardPage = () => {
       </div>
     )
   }
+
+  // Calculate average order value
+  const averageOrderValue = stats?.totalOrders 
+    ? (stats.totalRevenue / stats.totalOrders).toFixed(2)
+    : "0.00"
 
   return (
     <div className="space-y-8">
@@ -81,7 +84,7 @@ const ManagerDashboardPage = () => {
           <CardContent>
             <div className="text-2xl font-bold">${stats?.totalRevenue?.toFixed(2) || "0.00"}</div>
             <div className="flex items-center text-xs text-muted-foreground">
-              <span className="ml-1">Last 6 months performance</span>
+              <span className="ml-1">Total revenue from all orders</span>
             </div>
           </CardContent>
         </Card>
@@ -101,13 +104,13 @@ const ManagerDashboardPage = () => {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Active Orders</CardTitle>
-            <Activity className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium">Total Customers</CardTitle>
+            <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats?.activeOrders || "0"}</div>
+            <div className="text-2xl font-bold">{stats?.totalCustomers || "0"}</div>
             <div className="flex items-center text-xs text-muted-foreground">
-              <span className="ml-1">Orders currently being processed</span>
+              <span className="ml-1">Unique customers served</span>
             </div>
           </CardContent>
         </Card>
@@ -115,12 +118,12 @@ const ManagerDashboardPage = () => {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Avg. Order Value</CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
+            <DollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">$N/A</div>
+            <div className="text-2xl font-bold">${averageOrderValue}</div>
             <div className="flex items-center text-xs text-muted-foreground">
-              <span className="ml-1">Data not available</span>
+              <span className="ml-1">Average amount per order</span>
             </div>
           </CardContent>
         </Card>
@@ -150,18 +153,20 @@ const ManagerDashboardPage = () => {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {activities && activities.length > 0 ? (
-                activities.slice(0, 5).map((order) => (
-                  <div key={order.id} className="flex items-center justify-between">
+              {orders && orders.length > 0 ? (
+                orders.slice(0, 5).map((order) => (
+                  <div key={order._id} className="flex items-center justify-between">
                     <div className="space-y-1">
-                      <p className="text-sm font-medium">{order.description}</p>
-                      <p className="text-xs text-muted-foreground">Order ID: {order.id}</p>
+                      <p className="text-sm font-medium">{order.user.name}</p>
+                      <p className="text-xs text-muted-foreground">Order ID: {order._id}</p>
                     </div>
                     <div className="text-right space-y-1">
-                      <p className="text-sm font-medium">Status:</p>
+                      <p className="text-sm font-medium">${order.totalAmount.toFixed(2)}</p>
                       <Badge
                         variant={
-                          order.status === "delivered" ? "default" : order.status === "inProgress" ? "secondary" : "destructive"
+                          order.status === "paid" ? "default" : 
+                          order.status === "placed" ? "secondary" : 
+                          "destructive"
                         }
                         className="text-xs"
                       >
@@ -181,11 +186,26 @@ const ManagerDashboardPage = () => {
       <div className="grid gap-4 lg:grid-cols-2">
         <Card>
           <CardHeader>
-            <CardTitle>Device Usage</CardTitle>
-            <CardDescription>How customers access your restaurant</CardDescription>
+            <CardTitle>Top Customers</CardTitle>
+            <CardDescription>Your most valuable customers</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="h-64 bg-gray-200 flex items-center justify-center rounded">Device Usage Chart Placeholder</div>
+            {customers && customers.length > 0 ? (
+              customers.slice(0, 5).map((customer) => (
+                <div key={customer._id} className="flex items-center justify-between">
+                  <div className="space-y-1">
+                    <p className="text-sm font-medium">{customer.name}</p>
+                    <p className="text-xs text-muted-foreground">{customer.email}</p>
+                  </div>
+                  <div className="text-right space-y-1">
+                    <p className="text-sm font-medium">${customer.totalSpent.toFixed(2)}</p>
+                    <p className="text-xs text-muted-foreground">{customer.totalOrders} orders</p>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <div className="h-64 flex items-center justify-center text-muted-foreground">No customer data available</div>
+            )}
           </CardContent>
         </Card>
 
@@ -212,7 +232,37 @@ const ManagerDashboardPage = () => {
           <CardDescription>Complete list of recent transactions</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="h-64 bg-gray-200 flex items-center justify-center rounded">Recent Orders Table Placeholder</div>
+          {orders && orders.length > 0 ? (
+            <div className="space-y-4">
+              {orders.map((order) => (
+                <div key={order._id} className="flex items-center justify-between p-4 border rounded-lg">
+                  <div className="space-y-1">
+                    <p className="text-sm font-medium">{order.user.name}</p>
+                    <p className="text-xs text-muted-foreground">{order.user.email}</p>
+                    <p className="text-xs text-muted-foreground">Order ID: {order._id}</p>
+                  </div>
+                  <div className="text-right space-y-1">
+                    <p className="text-sm font-medium">${order.totalAmount.toFixed(2)}</p>
+                    <Badge
+                      variant={
+                        order.status === "paid" ? "default" : 
+                        order.status === "placed" ? "secondary" : 
+                        "destructive"
+                      }
+                      className="text-xs"
+                    >
+                      {order.status}
+                    </Badge>
+                    <p className="text-xs text-muted-foreground">
+                      {new Date(order.createdAt).toLocaleDateString()}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="h-64 flex items-center justify-center text-muted-foreground">No orders found</div>
+          )}
         </CardContent>
       </Card>
     </div>

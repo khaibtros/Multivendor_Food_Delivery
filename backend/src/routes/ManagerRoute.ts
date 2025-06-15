@@ -9,6 +9,9 @@ import {
   getRestaurantShippers,
   addRestaurantShipper,
   removeRestaurantShipper,
+  getRestaurantStats,
+  getRestaurantOrders,
+  getRestaurantCustomers,
 } from "../controllers/manager/ManagerController";
 
 const router = express.Router();
@@ -22,6 +25,11 @@ router.get("/restaurant", getManagerRestaurant);
 
 // Verify manager access for a specific restaurant
 router.get("/verify/:restaurantId", verifyManagerAccess);
+
+// Restaurant statistics and data
+router.get("/stats", getRestaurantStats);
+router.get("/orders", getRestaurantOrders);
+router.get("/customers", getRestaurantCustomers);
 
 // Seller management routes
 router.get("/sellers", getRestaurantSellers);

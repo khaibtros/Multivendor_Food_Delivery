@@ -359,3 +359,176 @@ export const removeRestaurantShipper = async (req: Request, res: Response) => {
     return res.status(500).json({ message: "Internal server error" });
   }
 };
+
+export const getRestaurantStats = async (req: Request, res: Response) => {
+  try {
+    const auth0Id = req.auth0Id;
+
+    if (!auth0Id) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+
+    const manager = await User.findOne({ auth0Id });
+
+    if (!manager || manager.role !== "manager") {
+      return res.status(403).json({ message: "Access denied" });
+    }
+
+    // Get the restaurant owned by this manager
+    const restaurant = await Restaurant.findOne({ user: manager._id });
+
+    if (!restaurant) {
+      return res.status(404).json({ message: "No restaurant found for this manager" });
+    }
+
+    // Get total revenue from paid orders
+    const totalRevenue = await Order.aggregate([
+      {
+        $match: {
+          restaurant: restaurant._id,
+          status: "paid"
+        }
+      },
+      {
+        $group: {
+          _id: null,
+          total: { $sum: "$totalAmount" }
+        }
+      }
+    ]);
+
+    // Get total number of unique customers
+    const totalCustomers = await Order.aggregate([
+      {
+        $match: {
+          restaurant: restaurant._id
+        }
+      },
+      {
+        $group: {
+          _id: "$user"
+        }
+      },
+      {
+        $count: "total"
+      }
+    ]);
+
+    // Get total number of orders
+    const totalOrders = await Order.countDocuments({
+      restaurant: restaurant._id
+    });
+
+    return res.status(200).json({
+      totalRevenue: totalRevenue[0]?.total || 0,
+      totalCustomers: totalCustomers[0]?.total || 0,
+      totalOrders
+    });
+  } catch (error) {
+    console.error("Error in getRestaurantStats:", error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+export const getRestaurantOrders = async (req: Request, res: Response) => {
+  try {
+    const auth0Id = req.auth0Id;
+
+    if (!auth0Id) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+
+    const manager = await User.findOne({ auth0Id });
+
+    if (!manager || manager.role !== "manager") {
+      return res.status(403).json({ message: "Access denied" });
+    }
+
+    // Get the restaurant owned by this manager
+    const restaurant = await Restaurant.findOne({ user: manager._id });
+
+    if (!restaurant) {
+      return res.status(404).json({ message: "No restaurant found for this manager" });
+    }
+
+    // Get all orders for this restaurant with populated user details
+    const orders = await Order.find({ restaurant: restaurant._id })
+      .populate("user", "email name")
+      .sort({ createdAt: -1 }) // Sort by newest first
+      .select('-__v');
+
+    return res.status(200).json(orders);
+  } catch (error) {
+    console.error("Error in getRestaurantOrders:", error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+export const getRestaurantCustomers = async (req: Request, res: Response) => {
+  try {
+    const auth0Id = req.auth0Id;
+
+    if (!auth0Id) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+
+    const manager = await User.findOne({ auth0Id });
+
+    if (!manager || manager.role !== "manager") {
+      return res.status(403).json({ message: "Access denied" });
+    }
+
+    // Get the restaurant owned by this manager
+    const restaurant = await Restaurant.findOne({ user: manager._id });
+
+    if (!restaurant) {
+      return res.status(404).json({ message: "No restaurant found for this manager" });
+    }
+
+    // Get all unique customers who have placed orders at this restaurant
+    const customers = await Order.aggregate([
+      {
+        $match: {
+          restaurant: restaurant._id
+        }
+      },
+      {
+        $group: {
+          _id: "$user",
+          totalOrders: { $sum: 1 },
+          totalSpent: { $sum: "$totalAmount" },
+          lastOrderDate: { $max: "$createdAt" }
+        }
+      },
+      {
+        $lookup: {
+          from: "users",
+          localField: "_id",
+          foreignField: "_id",
+          as: "userDetails"
+        }
+      },
+      {
+        $unwind: "$userDetails"
+      },
+      {
+        $project: {
+          _id: 1,
+          email: "$userDetails.email",
+          name: "$userDetails.name",
+          totalOrders: 1,
+          totalSpent: 1,
+          lastOrderDate: 1
+        }
+      },
+      {
+        $sort: { lastOrderDate: -1 }
+      }
+    ]);
+
+    return res.status(200).json(customers);
+  } catch (error) {
+    console.error("Error in getRestaurantCustomers:", error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};

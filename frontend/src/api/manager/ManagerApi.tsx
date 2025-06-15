@@ -13,11 +13,40 @@ interface VerifyManagerResponse {
 }
 
 interface RestaurantStats {
-  restaurantName: string;
-  activeOrders: number;
   totalRevenue: number;
+  totalCustomers: number;
   totalOrders: number;
-  restaurantId: string;
+}
+
+interface RestaurantOrder {
+  _id: string;
+  user: {
+    email: string;
+    name: string;
+  };
+  status: string;
+  totalAmount: number;
+  createdAt: string;
+  deliveryDetails: {
+    email: string;
+    name: string;
+    addressLine1: string;
+    city: string;
+  };
+  cartItems: {
+    menuItemId: string;
+    name: string;
+    quantity: string;
+  }[];
+}
+
+interface RestaurantCustomer {
+  _id: string;
+  email: string;
+  name: string;
+  totalOrders: number;
+  totalSpent: number;
+  lastOrderDate: string;
 }
 
 interface RecentActivity {
@@ -56,13 +85,13 @@ export const useVerifyManagerAccess = (restaurantId?: string) => {
   });
 };
 
-export const useGetRestaurantStats = (restaurantId: string) => {
+export const useGetRestaurantStats = () => {
   const { getAccessTokenSilently } = useAuth0();
 
   const getRestaurantStatsRequest = async () => {
     const accessToken = await getAccessTokenSilently();
     const response = await fetch(
-      `${import.meta.env.VITE_API_BASE_URL}/api/manager/restaurant/${restaurantId}/stats`,
+      `${import.meta.env.VITE_API_BASE_URL}/api/manager/stats`,
       {
         headers: {
           Authorization: `Bearer ${accessToken}`,
@@ -78,11 +107,73 @@ export const useGetRestaurantStats = (restaurantId: string) => {
   };
 
   return useQuery<RestaurantStats>({
-    queryKey: ["restaurantStats", restaurantId],
+    queryKey: ["restaurantStats"],
     queryFn: getRestaurantStatsRequest,
     refetchInterval: 30000, // Refetch every 30 seconds
     onError: () => {
       toast.error("Failed to fetch restaurant statistics");
+    },
+  });
+};
+
+export const useGetRestaurantOrders = () => {
+  const { getAccessTokenSilently } = useAuth0();
+
+  const getRestaurantOrdersRequest = async () => {
+    const accessToken = await getAccessTokenSilently();
+    const response = await fetch(
+      `${import.meta.env.VITE_API_BASE_URL}/api/manager/orders`,
+      {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error("Failed to fetch restaurant orders");
+    }
+
+    return response.json();
+  };
+
+  return useQuery<RestaurantOrder[]>({
+    queryKey: ["restaurantOrders"],
+    queryFn: getRestaurantOrdersRequest,
+    refetchInterval: 30000, // Refetch every 30 seconds
+    onError: () => {
+      toast.error("Failed to fetch restaurant orders");
+    },
+  });
+};
+
+export const useGetRestaurantCustomers = () => {
+  const { getAccessTokenSilently } = useAuth0();
+
+  const getRestaurantCustomersRequest = async () => {
+    const accessToken = await getAccessTokenSilently();
+    const response = await fetch(
+      `${import.meta.env.VITE_API_BASE_URL}/api/manager/customers`,
+      {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error("Failed to fetch restaurant customers");
+    }
+
+    return response.json();
+  };
+
+  return useQuery<RestaurantCustomer[]>({
+    queryKey: ["restaurantCustomers"],
+    queryFn: getRestaurantCustomersRequest,
+    refetchInterval: 60000, // Refetch every minute
+    onError: () => {
+      toast.error("Failed to fetch restaurant customers");
     },
   });
 };
