@@ -1,0 +1,361 @@
+import { Request, Response } from "express";
+import User from "../../models/user";
+import Restaurant from "../../models/restaurant";
+import Order from "../../models/order";
+
+export const verifyManagerAccess = async (req: Request, res: Response) => {
+  try {
+    const auth0Id = req.auth0Id;
+    const restaurantId = req.params.restaurantId;
+
+    if (!auth0Id) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+
+    const user = await User.findOne({ auth0Id });
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    if (user.role !== "manager") {
+      return res
+        .status(403)
+        .json({ message: "Access denied. Manager role required." });
+    }
+
+    // Verify if the manager owns this restaurant
+    const restaurant = await Restaurant.findOne({
+      _id: restaurantId,
+      user: user._id,
+    });
+
+    if (!restaurant) {
+      return res.status(403).json({ message: "Access denied to this restaurant" });
+    }
+
+    return res.status(200).json({ user, restaurant });
+  } catch (error) {
+    console.error("Error in verifyManagerAccess:", error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+export const getManagerRestaurant = async (req: Request, res: Response) => {
+  try {
+    const auth0Id = req.auth0Id;
+
+    if (!auth0Id) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+
+    const user = await User.findOne({ auth0Id });
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    if (user.role !== "manager") {
+      return res
+        .status(403)
+        .json({ message: "Access denied. Manager role required." });
+    }
+
+    // Get the restaurant owned by this manager with all fields
+    const restaurant = await Restaurant.findOne({ user: user._id })
+      .select('-__v') // Exclude version field
+      .lean(); // Convert to plain JavaScript object
+
+    if (!restaurant) {
+      return res.status(404).json({ message: "No restaurant found for this manager" });
+    }
+
+    return res.status(200).json({ 
+      user: {
+        _id: user._id,
+        email: user.email,
+        role: user.role
+      }, 
+      restaurant 
+    });
+  } catch (error) {
+    console.error("Error in getManagerRestaurant:", error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+export const getRestaurantSellers = async (req: Request, res: Response) => {
+  try {
+    const auth0Id = req.auth0Id;
+
+    if (!auth0Id) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+
+    const user = await User.findOne({ auth0Id });
+
+    if (!user || user.role !== "manager") {
+      return res.status(403).json({ message: "Access denied" });
+    }
+
+    // Get the restaurant owned by this manager
+    const restaurant = await Restaurant.findOne({ user: user._id });
+
+    if (!restaurant) {
+      return res.status(404).json({ message: "No restaurant found for this manager" });
+    }
+
+    // Get all sellers associated with this restaurant
+    const sellers = await User.find({ 
+      restaurant: restaurant._id,
+      role: "seller"
+    }).select('-__v');
+
+    return res.status(200).json(sellers);
+  } catch (error) {
+    console.error("Error in getRestaurantSellers:", error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+export const addRestaurantSeller = async (req: Request, res: Response) => {
+  try {
+    const { email, restaurantId } = req.body;
+    const auth0Id = req.auth0Id;
+
+    if (!auth0Id) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+
+    if (!email || !restaurantId) {
+      return res.status(400).json({ message: "Email and restaurant ID are required" });
+    }
+
+    const manager = await User.findOne({ auth0Id });
+
+    if (!manager || manager.role !== "manager") {
+      return res.status(403).json({ message: "Access denied. Manager role required." });
+    }
+
+    // Check if restaurant exists and belongs to manager
+    const restaurant = await Restaurant.findOne({
+      _id: restaurantId,
+      user: manager._id,
+    });
+
+    if (!restaurant) {
+      return res.status(404).json({ message: "Restaurant not found" });
+    }
+
+    // Find the user to be converted to seller
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found. The user must login to the system first." });
+    }
+
+    // Only allow converting users with 'user' role to sellers
+    if (user.role !== "user") {
+      return res.status(403).json({ 
+        message: "Cannot convert this user to seller. Only users with 'user' role can be converted to sellers." 
+      });
+    }
+
+    // Convert user to seller
+    user.role = "seller";
+    user.restaurant = restaurantId;
+    await user.save();
+
+    res.status(200).json({
+      _id: user._id,
+      email: user.email,
+      role: user.role,
+    });
+  } catch (error) {
+    console.error("Error in addRestaurantSeller:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+export const removeRestaurantSeller = async (req: Request, res: Response) => {
+  try {
+    const auth0Id = req.auth0Id;
+    const { sellerId } = req.params;
+
+    if (!auth0Id) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+
+    const manager = await User.findOne({ auth0Id });
+
+    if (!manager || manager.role !== "manager") {
+      return res.status(403).json({ message: "Access denied" });
+    }
+
+    // Get the restaurant owned by this manager
+    const restaurant = await Restaurant.findOne({ user: manager._id });
+
+    if (!restaurant) {
+      return res.status(404).json({ message: "No restaurant found for this manager" });
+    }
+
+    // Find and remove the seller
+    const seller = await User.findOne({
+      _id: sellerId,
+      restaurant: restaurant._id,
+      role: "seller",
+    });
+
+    if (!seller) {
+      return res.status(404).json({ message: "Seller not found" });
+    }
+
+    // Remove seller's association with the restaurant
+    seller.restaurant = undefined;
+    seller.role = "user"; // Reset role to regular user
+    await seller.save();
+
+    return res.status(200).json({ message: "Seller removed successfully" });
+  } catch (error) {
+    console.error("Error in removeRestaurantSeller:", error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+export const getRestaurantShippers = async (req: Request, res: Response) => {
+  try {
+    const auth0Id = req.auth0Id;
+
+    if (!auth0Id) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+
+    const user = await User.findOne({ auth0Id });
+
+    if (!user || user.role !== "manager") {
+      return res.status(403).json({ message: "Access denied" });
+    }
+
+    // Get the restaurant owned by this manager
+    const restaurant = await Restaurant.findOne({ user: user._id });
+
+    if (!restaurant) {
+      return res.status(404).json({ message: "No restaurant found for this manager" });
+    }
+
+    // Get all shippers associated with this restaurant
+    const shippers = await User.find({ 
+      restaurant: restaurant._id,
+      role: "shipper"
+    }).select('-__v');
+
+    return res.status(200).json(shippers);
+  } catch (error) {
+    console.error("Error in getRestaurantShippers:", error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+export const addRestaurantShipper = async (req: Request, res: Response) => {
+  try {
+    const { email, restaurantId } = req.body;
+    const auth0Id = req.auth0Id;
+
+    if (!auth0Id) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+
+    if (!email || !restaurantId) {
+      return res.status(400).json({ message: "Email and restaurant ID are required" });
+    }
+
+    const manager = await User.findOne({ auth0Id });
+
+    if (!manager || manager.role !== "manager") {
+      return res.status(403).json({ message: "Access denied. Manager role required." });
+    }
+
+    // Check if restaurant exists and belongs to manager
+    const restaurant = await Restaurant.findOne({
+      _id: restaurantId,
+      user: manager._id,
+    });
+
+    if (!restaurant) {
+      return res.status(404).json({ message: "Restaurant not found" });
+    }
+
+    // Find the user to be converted to shipper
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found. The user must login to the system first." });
+    }
+
+    // Only allow converting users with 'user' role to shippers
+    if (user.role !== "user") {
+      return res.status(403).json({ 
+        message: "Cannot convert this user to shipper. Only users with 'user' role can be converted to shippers." 
+      });
+    }
+
+    // Convert user to shipper
+    user.role = "shipper";
+    user.restaurant = restaurantId;
+    await user.save();
+
+    res.status(200).json({
+      _id: user._id,
+      email: user.email,
+      role: user.role,
+    });
+  } catch (error) {
+    console.error("Error in addRestaurantShipper:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+export const removeRestaurantShipper = async (req: Request, res: Response) => {
+  try {
+    const auth0Id = req.auth0Id;
+    const { shipperId } = req.params;
+
+    if (!auth0Id) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+
+    const manager = await User.findOne({ auth0Id });
+
+    if (!manager || manager.role !== "manager") {
+      return res.status(403).json({ message: "Access denied" });
+    }
+
+    // Get the restaurant owned by this manager
+    const restaurant = await Restaurant.findOne({ user: manager._id });
+
+    if (!restaurant) {
+      return res.status(404).json({ message: "No restaurant found for this manager" });
+    }
+
+    // Find and remove the shipper
+    const shipper = await User.findOne({
+      _id: shipperId,
+      restaurant: restaurant._id,
+      role: "shipper",
+    });
+
+    if (!shipper) {
+      return res.status(404).json({ message: "Shipper not found" });
+    }
+
+    // Remove shipper's association with the restaurant
+    shipper.restaurant = undefined;
+    shipper.role = "user"; // Reset role to regular user
+    await shipper.save();
+
+    return res.status(200).json({ message: "Shipper removed successfully" });
+  } catch (error) {
+    console.error("Error in removeRestaurantShipper:", error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
