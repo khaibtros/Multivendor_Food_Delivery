@@ -38,8 +38,8 @@ app.use("/api/my/restaurant", myRestaurantRoute);
 app.use("/api/restaurant", restaurantRoute);
 app.use("/api/order", orderRoute);
 app.use("/api/admin", adminRoute);
-app.use("/api/manager", managerRoute);
 app.use("/api/seller", sellerRoute);
+app.use("/api/manager", managerRoute);
 app.use("/api/shipper", shipperRoute);
 
 app.listen(7000, () => {

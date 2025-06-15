@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom"
 import { useAuth0 } from "@auth0/auth0-react"
 import { Store } from "lucide-react"
 import { useGetSellerRestaurant } from "@/api/seller/SellerApi"
+import { toast } from "sonner"
 
 const SellerLoginPage = () => {
   const { loginWithRedirect, isAuthenticated, getAccessTokenSilently } = useAuth0()
@@ -11,28 +12,36 @@ const SellerLoginPage = () => {
 
   useEffect(() => {
     const setupAuth = async () => {
-      if (isAuthenticated) {
+      if (isAuthenticated && !isLoading) {
         try {
-          const token = await getAccessTokenSilently()
+          // Force a token refresh to get updated role information
+          const token = await getAccessTokenSilently({
+            authorizationParams: {
+              prompt: "login"
+            }
+          })
+          
           localStorage.setItem("sellerToken", token)
           
           if (data) {
             // If we have data, the user is a seller with a restaurant
             localStorage.setItem("sellerUser", JSON.stringify(data.user))
-            navigate(`/seller/dashboard/${data.restaurant._id}`)
+            navigate("/seller/orders")
           } else if (error) {
-            // If there's an error, the user is not a seller
+            // If there's an error, show a message and redirect
+            toast.error("You don't have permission to access the seller dashboard. Please contact your manager.")
             navigate("/")
           }
         } catch (error) {
           console.error("Error getting access token:", error)
+          toast.error("Authentication failed. Please try logging in again.")
           navigate("/")
         }
       }
     }
 
     setupAuth()
-  }, [isAuthenticated, data, error, navigate, getAccessTokenSilently])
+  }, [isAuthenticated, isLoading, data, error, navigate, getAccessTokenSilently])
 
   return (
     <div className="min-h-screen bg-gray-50">

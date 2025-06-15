@@ -136,91 +136,91 @@ const createCheckoutSession = async (req: Request, res: Response) => {
   }
 };
 
-// Function to update order status (for sellers)
-const updateOrderStatus = async (req: Request, res: Response) => {
-  try {
-    const { orderId } = req.params;
-    const { status } = req.body;
-    const userId = req.userId;
+// // Function to update order status (for sellers)
+// const updateOrderStatus = async (req: Request, res: Response) => {
+//   try {
+//     const { orderId } = req.params;
+//     const { status } = req.body;
+//     const userId = req.userId;
 
-    // Get user to check role
-    const user = await User.findById(userId);
-    if (!user || user.role !== "seller") {
-      return res.status(403).json({ message: "Only sellers can update order status" });
-    }
+//     // Get user to check role
+//     const user = await User.findById(userId);
+//     if (!user || user.role !== "seller") {
+//       return res.status(403).json({ message: "Only sellers can update order status" });
+//     }
 
-    const order = await Order.findOne({
-      _id: orderId,
-      restaurant: user.restaurant
-    });
+//     const order = await Order.findOne({
+//       _id: orderId,
+//       restaurant: user.restaurant
+//     });
 
-    if (!order) {
-      return res.status(404).json({ message: "Order not found" });
-    }
+//     if (!order) {
+//       return res.status(404).json({ message: "Order not found" });
+//     }
 
-    // Validate status transitions for sellers
-    const validTransitions = {
-      pending: ["confirmed", "inProgress"],
-      confirmed: ["inProgress"],
-      inProgress: ["outForDelivery"]
-    };
+//     // Validate status transitions for sellers
+//     const validTransitions = {
+//       pending: ["confirmed", "inProgress"],
+//       confirmed: ["inProgress"],
+//       inProgress: ["outForDelivery"]
+//     };
 
-    if (!validTransitions[order.status as keyof typeof validTransitions]?.includes(status)) {
-      return res.status(400).json({ message: "Invalid status transition" });
-    }
+//     if (!validTransitions[order.status as keyof typeof validTransitions]?.includes(status)) {
+//       return res.status(400).json({ message: "Invalid status transition" });
+//     }
 
-    order.status = status;
-    await order.save();
+//     order.status = status;
+//     await order.save();
 
-    res.json({ message: "Order status updated successfully", order });
-  } catch (error) {
-    console.log(error);
-    res.status(500).json({ message: "Error updating order status" });
-  }
-};
+//     res.json({ message: "Order status updated successfully", order });
+//   } catch (error) {
+//     console.log(error);
+//     res.status(500).json({ message: "Error updating order status" });
+//   }
+// };
 
-// Function for shippers to confirm delivery and COD payment
-const confirmDeliveryAndPayment = async (req: Request, res: Response) => {
-  try {
-    const { orderId } = req.params;
-    const userId = req.userId;
+// // Function for shippers to confirm delivery and COD payment
+// const confirmDeliveryAndPayment = async (req: Request, res: Response) => {
+//   try {
+//     const { orderId } = req.params;
+//     const userId = req.userId;
 
-    // Get user to check role
-    const user = await User.findById(userId);
-    if (!user || user.role !== "shipper") {
-      return res.status(403).json({ message: "Only shippers can confirm delivery" });
-    }
+//     // Get user to check role
+//     const user = await User.findById(userId);
+//     if (!user || user.role !== "shipper") {
+//       return res.status(403).json({ message: "Only shippers can confirm delivery" });
+//     }
 
-    const order = await Order.findOne({
-      _id: orderId,
-      shipper: userId,
-      status: "outForDelivery"
-    });
+//     const order = await Order.findOne({
+//       _id: orderId,
+//       shipper: userId,
+//       status: "outForDelivery"
+//     });
 
-    if (!order) {
-      return res.status(404).json({ message: "Order not found or not assigned to you" });
-    }
+//     if (!order) {
+//       return res.status(404).json({ message: "Order not found or not assigned to you" });
+//     }
 
-    // Update both status and payment status
-    order.status = "delivered";
+//     // Update both status and payment status
+//     order.status = "delivered";
     
-    // If it's a COD order, mark payment as paid
-    if (order.paymentMethod === "cod") {
-      order.paymentStatus = "paid";
-    }
+//     // If it's a COD order, mark payment as paid
+//     if (order.paymentMethod === "cod") {
+//       order.paymentStatus = "paid";
+//     }
 
-    await order.save();
+//     await order.save();
 
-    res.json({ 
-      message: "Delivery confirmed successfully" + 
-      (order.paymentMethod === "cod" ? " and payment received" : ""),
-      order 
-    });
-  } catch (error) {
-    console.log(error);
-    res.status(500).json({ message: "Error confirming delivery" });
-  }
-};
+//     res.json({ 
+//       message: "Delivery confirmed successfully" + 
+//       (order.paymentMethod === "cod" ? " and payment received" : ""),
+//       order 
+//     });
+//   } catch (error) {
+//     console.log(error);
+//     res.status(500).json({ message: "Error confirming delivery" });
+//   }
+// };
 
 const createLineItems = (
   checkoutSessionRequest: CheckoutSessionRequest,
@@ -287,7 +287,5 @@ const createSession = async (
 export default {
   getMyOrders,
   createCheckoutSession,
-  stripeWebhookHandler,
-  updateOrderStatus,
-  confirmDeliveryAndPayment,
+  stripeWebhookHandler
 };

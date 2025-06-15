@@ -161,17 +161,21 @@ const ManagerDashboardPage = () => {
                       <p className="text-xs text-muted-foreground">Order ID: {order._id}</p>
                     </div>
                     <div className="text-right space-y-1">
-                      <p className="text-sm font-medium">${order.totalAmount.toFixed(2)}</p>
-                      <Badge
-                        variant={
-                          order.status === "paid" ? "default" : 
-                          order.status === "placed" ? "secondary" : 
-                          "destructive"
-                        }
-                        className="text-xs"
-                      >
-                        {order.status}
-                      </Badge>
+                      <p className="text-sm font-medium">${(order.totalAmount / 100).toFixed(2)}</p>
+                      <div className="flex gap-1 justify-end">
+                        <Badge
+                          variant={order.paymentStatus === "paid" ? "default" : "destructive"}
+                          className="text-xs"
+                        >
+                          {order.paymentStatus.toUpperCase()}
+                        </Badge>
+                        <Badge
+                          variant="outline"
+                          className="text-xs"
+                        >
+                          {order.status}
+                        </Badge>
+                      </div>
                     </div>
                   </div>
                 ))
@@ -242,17 +246,21 @@ const ManagerDashboardPage = () => {
                     <p className="text-xs text-muted-foreground">Order ID: {order._id}</p>
                   </div>
                   <div className="text-right space-y-1">
-                    <p className="text-sm font-medium">${order.totalAmount.toFixed(2)}</p>
-                    <Badge
-                      variant={
-                        order.status === "paid" ? "default" : 
-                        order.status === "placed" ? "secondary" : 
-                        "destructive"
-                      }
-                      className="text-xs"
-                    >
-                      {order.status}
-                    </Badge>
+                    <p className="text-sm font-medium">${(order.totalAmount / 100).toFixed(2)}</p>
+                    <div className="flex gap-1 justify-end">
+                      <Badge
+                        variant={order.paymentStatus === "paid" ? "default" : "destructive"}
+                        className="text-xs"
+                      >
+                        {order.paymentStatus.toUpperCase()}
+                      </Badge>
+                      <Badge
+                        variant="outline"
+                        className="text-xs"
+                      >
+                        {order.status}
+                      </Badge>
+                    </div>
                     <p className="text-xs text-muted-foreground">
                       {new Date(order.createdAt).toLocaleDateString()}
                     </p>

@@ -73,7 +73,7 @@ export interface User {
   createdAt: Date;
 }
 
-export type OrderStatus = "placed" | "paid" | "inProgress" | "outForDelivery" | "delivered";
+export type OrderStatus = "pending" | "confirmed" | "inProgress" | "outForDelivery" | "delivered";
 
 export interface Order {
   _id: string;
@@ -105,6 +105,8 @@ export interface Order {
   }[];
   totalAmount: number;
   status: OrderStatus;
+  paymentMethod: "cod" | "online";
+  paymentStatus: "unpaid" | "paid";
   createdAt: Date;
   updatedAt: Date;
 } 

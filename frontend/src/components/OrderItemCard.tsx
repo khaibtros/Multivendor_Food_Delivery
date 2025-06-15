@@ -11,15 +11,16 @@ import {
   SelectValue,
 } from "./ui/select";
 import { ORDER_STATUS } from "@/config/order-status-config";
-import { useUpdateMyRestaurantOrder } from "@/api/MyRestaurantApi";
+import { useUpdateOrderStatus } from "@/api/seller/SellerApi";
 import { useEffect, useState } from "react";
 
 type Props = {
   order: Order;
+  role: "seller" | "shipper";
 };
 
-const OrderItemCard = ({ order }: Props) => {
-  const { updateRestaurantStatus, isLoading } = useUpdateMyRestaurantOrder();
+const OrderItemCard = ({ order, role }: Props) => {
+  const { mutate: updateOrderStatus, isLoading } = useUpdateOrderStatus();
   const [status, setStatus] = useState<OrderStatus>(order.status);
 
   useEffect(() => {
@@ -27,22 +28,40 @@ const OrderItemCard = ({ order }: Props) => {
   }, [order.status]);
 
   const handleStatusChange = async (newStatus: OrderStatus) => {
-    await updateRestaurantStatus({
-      orderId: order._id as string,
-      status: newStatus,
-    });
-    setStatus(newStatus);
+    updateOrderStatus(
+      { orderId: order._id as string, status: newStatus },
+      {
+        onSuccess: () => {
+          setStatus(newStatus);
+        },
+      }
+    );
   };
 
   const getTime = () => {
     const orderDateTime = new Date(order.createdAt);
-
     const hours = orderDateTime.getHours();
     const minutes = orderDateTime.getMinutes();
-
     const paddedMinutes = minutes < 10 ? `0${minutes}` : minutes;
-
     return `${hours}:${paddedMinutes}`;
+  };
+
+  const getAvailableStatuses = () => {
+    if (role === "shipper") {
+      // Shippers can only confirm delivery
+      return ORDER_STATUS.filter((s) => s.value === "delivered");
+    }
+
+    // Sellers can update status based on payment method
+    const validTransitions = {
+      pending: ["confirmed", "inProgress"],
+      confirmed: ["inProgress"],
+      inProgress: ["outForDelivery"],
+    };
+
+    return ORDER_STATUS.filter((s) => 
+      validTransitions[order.status as keyof typeof validTransitions]?.includes(s.value)
+    );
   };
 
   return (
@@ -72,21 +91,34 @@ const OrderItemCard = ({ order }: Props) => {
             </span>
           </div>
         </CardTitle>
+        <div className="flex gap-2 mt-2">
+          <Badge variant={order.paymentStatus === "paid" ? "default" : "destructive"}>
+            Payment: {order.paymentStatus}
+          </Badge>
+          <Badge variant="outline">
+            Method: {order.paymentMethod.toUpperCase()}
+          </Badge>
+        </div>
         <Separator />
       </CardHeader>
       <CardContent className="flex flex-col gap-6">
         <div className="flex flex-col gap-2">
           {order.cartItems.map((cartItem) => (
-            <span>
+            <span key={cartItem.menuItemId}>
               <Badge variant="outline" className="mr-2">
                 {cartItem.quantity}
               </Badge>
               {cartItem.name}
+              {cartItem.toppings && cartItem.toppings.length > 0 && (
+                <span className="text-sm text-muted-foreground ml-2">
+                  ({cartItem.toppings.map(t => t.selectedOption.name).join(", ")})
+                </span>
+              )}
             </span>
           ))}
         </div>
         <div className="flex flex-col space-y-1.5">
-          <Label htmlFor="status">What is the status of this order?</Label>
+          <Label htmlFor="status">Order Status</Label>
           <Select
             value={status}
             disabled={isLoading}
@@ -96,8 +128,10 @@ const OrderItemCard = ({ order }: Props) => {
               <SelectValue placeholder="Status" />
             </SelectTrigger>
             <SelectContent position="popper">
-              {ORDER_STATUS.map((status) => (
-                <SelectItem value={status.value}>{status.label}</SelectItem>
+              {getAvailableStatuses().map((status) => (
+                <SelectItem key={status.value} value={status.value}>
+                  {status.label}
+                </SelectItem>
               ))}
             </SelectContent>
           </Select>

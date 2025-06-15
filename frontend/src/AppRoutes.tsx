@@ -14,12 +14,13 @@ import RestaurantApprovalsPage from "./pages/admin/RestaurantApprovalsPage";
 import ManagerDashboardPage from "./pages/manager/ManagerDashboardPage";
 import ManagerLoginPage from "./pages/manager/ManagerLoginPage";
 import SellerLoginPage from "./pages/seller/SellerLoginPage";
-import SellerDashboardPage from "./pages/seller/SellerDashboardPage";
+import SellerOrdersPage from "./pages/seller/SellerOrdersPage";
 import DashboardLayout from "./layouts/ManagerLayout";
 import SellerLayout from "./layouts/SellerLayout";
+import ShipperLayout from "./layouts/ShipperLayout";
 import ManageSellersPage from "@/pages/manager/ManageSellersPage";
 import ShipperLoginPage from "@/pages/shipper/ShipperLoginPage";
-import ShipperDashboardPage from "@/pages/shipper/ShipperDashboardPage";
+import ShipperOrdersPage from "@/pages/shipper/ShipperOrdersPage";
 import ManageShippersPage from "@/pages/manager/ManageShippersPage";
 
 const AppRoutes = () => {
@@ -75,10 +76,10 @@ const AppRoutes = () => {
       <Route path="/seller" element={<SellerLoginPage />} />
       <Route element={<SellerProtectedRoute />}>
         <Route
-          path="/seller/dashboard/:restaurantId"
+          path="/seller/orders"
           element={
             <SellerLayout>
-              <SellerDashboardPage />
+              <SellerOrdersPage />
             </SellerLayout>
           }
         />
@@ -88,11 +89,11 @@ const AppRoutes = () => {
       <Route path="/shipper" element={<ShipperLoginPage />} />
       <Route element={<ShipperProtectedRoute />}>
         <Route
-          path="/shipper/dashboard/:restaurantId"
+          path="/shipper/orders"
           element={
-            <SellerLayout>
-              <ShipperDashboardPage />
-            </SellerLayout>
+            <ShipperLayout>
+              <ShipperOrdersPage />
+            </ShipperLayout>
           }
         />
       </Route>

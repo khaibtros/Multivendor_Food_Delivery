@@ -16,7 +16,7 @@ const orderSchema = new mongoose.Schema({
     name: { type: String, required: true },
     addressLine1: { type: String, required: true },
     street: { type: String, required: true },
-    ward: { type: String, required: true },
+    ward: { type: String, required: false },
     district: { type: String, required: true },
     city: { type: String, required: true },
     country: { type: String, required: true },

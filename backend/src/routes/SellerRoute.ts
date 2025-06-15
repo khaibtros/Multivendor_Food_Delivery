@@ -1,8 +1,9 @@
 import express from "express";
 import { jwtCheck, jwtParse } from "../middleware/auth";
 import {
-  verifySellerAccess,
   getSellerRestaurant,
+  getSellerOrders,
+  updateOrderStatus,
 } from "../controllers/seller/SellerController";
 
 const router = express.Router();
@@ -14,8 +15,10 @@ router.use(jwtParse);
 // Get seller's restaurant data
 router.get("/restaurant", getSellerRestaurant);
 
-// Verify seller access for a specific restaurant
-router.get("/verify/:restaurantId", verifySellerAccess);
+// Get seller's orders
+router.get("/orders", getSellerOrders);
 
+// Update order status
+router.patch("/order/:orderId/status", updateOrderStatus);
 
-export default router; 
+export default router;

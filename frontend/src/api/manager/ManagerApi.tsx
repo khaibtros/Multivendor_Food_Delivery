@@ -24,19 +24,34 @@ interface RestaurantOrder {
     email: string;
     name: string;
   };
-  status: string;
+  status: "pending" | "confirmed" | "inProgress" | "outForDelivery" | "delivered";
+  paymentStatus: "unpaid" | "paid";
+  paymentMethod: "cod" | "online";
   totalAmount: number;
   createdAt: string;
   deliveryDetails: {
     email: string;
     name: string;
     addressLine1: string;
+    street: string;
+    ward: string;
+    district: string;
     city: string;
+    country: string;
   };
   cartItems: {
     menuItemId: string;
     name: string;
     quantity: string;
+    price: number;
+    toppings?: {
+      categoryName: string;
+      selectedOption: {
+        name: string;
+        price: number;
+      };
+    }[];
+    itemTotal: number;
   }[];
 }
 
@@ -47,14 +62,6 @@ interface RestaurantCustomer {
   totalOrders: number;
   totalSpent: number;
   lastOrderDate: string;
-}
-
-interface RecentActivity {
-  id: string;
-  type: string;
-  description: string;
-  timestamp: string;
-  status: string;
 }
 
 export const useVerifyManagerAccess = (restaurantId?: string) => {
@@ -117,32 +124,47 @@ export const useGetRestaurantStats = () => {
 };
 
 export const useGetRestaurantOrders = () => {
-  const { getAccessTokenSilently } = useAuth0();
+  const { getAccessTokenSilently, logout } = useAuth0();
 
   const getRestaurantOrdersRequest = async () => {
-    const accessToken = await getAccessTokenSilently();
-    const response = await fetch(
-      `${import.meta.env.VITE_API_BASE_URL}/api/manager/orders`,
-      {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
+    try {
+      const accessToken = await getAccessTokenSilently();
+      const response = await fetch(
+        `${import.meta.env.VITE_API_BASE_URL}/api/manager/orders`,
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        }
+      );
+
+      if (response.status === 403) {
+        toast.error("You don't have permission to view orders. Please contact support.");
+        return [];
       }
-    );
 
-    if (!response.ok) {
-      throw new Error("Failed to fetch restaurant orders");
+      if (!response.ok) {
+        throw new Error("Failed to fetch restaurant orders");
+      }
+
+      return response.json();
+    } catch (error) {
+      if (error instanceof Error && error.message.includes("token")) {
+        toast.error("Your session has expired. Please log in again.");
+        logout();
+      }
+      throw error;
     }
-
-    return response.json();
   };
 
   return useQuery<RestaurantOrder[]>({
     queryKey: ["restaurantOrders"],
     queryFn: getRestaurantOrdersRequest,
     refetchInterval: 30000, // Refetch every 30 seconds
-    onError: () => {
-      toast.error("Failed to fetch restaurant orders");
+    onError: (error) => {
+      if (error instanceof Error && !error.message.includes("token")) {
+        toast.error("Failed to fetch restaurant orders");
+      }
     },
   });
 };
@@ -178,58 +200,45 @@ export const useGetRestaurantCustomers = () => {
   });
 };
 
-export const useGetRestaurantActivity = (restaurantId: string) => {
-  const { getAccessTokenSilently } = useAuth0();
+export const useGetManagerRestaurant = () => {
+  const { getAccessTokenSilently, logout } = useAuth0();
 
-  const getRestaurantActivityRequest = async () => {
-    const accessToken = await getAccessTokenSilently();
-    const response = await fetch(
-      `${import.meta.env.VITE_API_BASE_URL}/api/manager/restaurant/${restaurantId}/activity`,
-      {
+  const getManagerRestaurantRequest = async () => {
+    try {
+      const accessToken = await getAccessTokenSilently();
+      
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/manager/restaurant`, {
         headers: {
           Authorization: `Bearer ${accessToken}`,
         },
+      });
+
+      if (response.status === 403) {
+        toast.error("You don't have permission to access this restaurant. Please contact support.");
+        return null;
       }
-    );
 
-    if (!response.ok) {
-      throw new Error("Failed to fetch restaurant activity");
+      if (!response.ok) {
+        throw new Error("Failed to get manager restaurant");
+      }
+
+      return response.json();
+    } catch (error) {
+      if (error instanceof Error && error.message.includes("token")) {
+        toast.error("Your session has expired. Please log in again.");
+        logout();
+      }
+      throw error;
     }
-
-    return response.json();
-  };
-
-  return useQuery<RecentActivity[]>({
-    queryKey: ["restaurantActivity", restaurantId],
-    queryFn: getRestaurantActivityRequest,
-    refetchInterval: 60000, // Refetch every minute
-    onError: () => {
-      toast.error("Failed to fetch recent activity");
-    },
-  });
-};
-
-export const useGetManagerRestaurant = () => {
-  const { getAccessTokenSilently } = useAuth0();
-
-  const getManagerRestaurantRequest = async () => {
-    const accessToken = await getAccessTokenSilently();
-    
-    const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/manager/restaurant`, {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
-    });
-
-    if (!response.ok) {
-      throw new Error("Failed to get manager restaurant");
-    }
-
-    return response.json();
   };
 
   return useQuery<VerifyManagerResponse>({
     queryKey: ["getManagerRestaurant"],
     queryFn: getManagerRestaurantRequest,
+    onError: (error) => {
+      if (error instanceof Error && !error.message.includes("token")) {
+        toast.error("Failed to get manager restaurant");
+      }
+    },
   });
 }; 

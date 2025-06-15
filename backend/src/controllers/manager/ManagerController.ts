@@ -381,12 +381,13 @@ export const getRestaurantStats = async (req: Request, res: Response) => {
       return res.status(404).json({ message: "No restaurant found for this manager" });
     }
 
-    // Get total revenue from paid orders
+    // Get total revenue from paid and delivered orders
     const totalRevenue = await Order.aggregate([
       {
         $match: {
           restaurant: restaurant._id,
-          status: "paid"
+          paymentStatus: "paid",
+          status: "delivered"
         }
       },
       {
@@ -397,11 +398,13 @@ export const getRestaurantStats = async (req: Request, res: Response) => {
       }
     ]);
 
-    // Get total number of unique customers
+    // Get total number of unique customers who have completed orders
     const totalCustomers = await Order.aggregate([
       {
         $match: {
-          restaurant: restaurant._id
+          restaurant: restaurant._id,
+          paymentStatus: "paid",
+          status: "delivered"
         }
       },
       {
@@ -414,9 +417,11 @@ export const getRestaurantStats = async (req: Request, res: Response) => {
       }
     ]);
 
-    // Get total number of orders
+    // Get total number of completed orders
     const totalOrders = await Order.countDocuments({
-      restaurant: restaurant._id
+      restaurant: restaurant._id,
+      paymentStatus: "paid",
+      status: "delivered"
     });
 
     return res.status(200).json({

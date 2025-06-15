@@ -40,22 +40,41 @@ type CheckoutSessionRequest = {
     menuItemId: string;
     name: string;
     quantity: string;
+    price: number;
+    toppings?: {
+      categoryName: string;
+      selectedOption: {
+        name: string;
+        price: number;
+      };
+    }[];
+    itemTotal: number;
   }[];
   deliveryDetails: {
     email: string;
     name: string;
     addressLine1: string;
+    street: string;
+    ward: string;
+    district: string;
     city: string;
+    country: string;
   };
   restaurantId: string;
+  paymentMethod: "cod" | "online";
 };
+
+interface CheckoutSessionResponse {
+  url?: string;
+  orderId?: string;
+}
 
 export const useCreateCheckoutSession = () => {
   const { getAccessTokenSilently } = useAuth0();
 
   const createCheckoutSessionRequest = async (
     checkoutSessionRequest: CheckoutSessionRequest
-  ) => {
+  ): Promise<CheckoutSessionResponse> => {
     const accessToken = await getAccessTokenSilently();
 
     const response = await fetch(
@@ -71,26 +90,26 @@ export const useCreateCheckoutSession = () => {
     );
 
     if (!response.ok) {
-      throw new Error("Unable to create checkout session");
+      const error = await response.json();
+      throw new Error(error.message || "Unable to create checkout session");
     }
 
     return response.json();
   };
 
-  const {
-    mutateAsync: createCheckoutSession,
-    isLoading,
-    error,
-    reset,
-  } = useMutation(createCheckoutSessionRequest);
-
-  if (error) {
-    toast.error(error.toString());
-    reset();
-  }
-
-  return {
-    createCheckoutSession,
-    isLoading,
-  };
+  return useMutation({
+    mutationFn: createCheckoutSessionRequest,
+    onSuccess: (data) => {
+      if (data.url) {
+        // For online payment, redirect to Stripe
+        window.location.href = data.url;
+      } else if (data.orderId) {
+        // For COD, show success message
+        toast.success("Order placed successfully! Waiting for confirmation.");
+      }
+    },
+    onError: (error) => {
+      toast.error(error instanceof Error ? error.message : "Failed to place order");
+    },
+  });
 };

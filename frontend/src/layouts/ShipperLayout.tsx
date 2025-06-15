@@ -5,17 +5,15 @@ import { useState } from "react"
 import { Link, useLocation } from "react-router-dom"
 import {
   LayoutDashboard,
-  CreditCard,
   Package,
-  Calendar,
   Menu,
   X,
   Bell,
   User,
   LogOut,
-  Store,
+  Truck,
 } from "lucide-react"
-import { useGetManagerRestaurant } from "@/api/manager/ManagerApi"
+import { useGetShipperRestaurant } from "@/api/shipper/ShipperApi"
 import { useAuth0 } from "@auth0/auth0-react"
 
 type Props = {
@@ -60,10 +58,10 @@ const NavGroup = ({
   )
 }
 
-const DashboardLayout = ({ children }: Props) => {
+const ShipperLayout = ({ children }: Props) => {
   const [sidebarOpen, setSidebarOpen] = useState(true)
   const location = useLocation()
-  const { data: managerData } = useGetManagerRestaurant()
+  const { data: shipperData } = useGetShipperRestaurant()
   const { user, logout } = useAuth0()
 
   const isActive = (path: string) => {
@@ -95,11 +93,11 @@ const DashboardLayout = ({ children }: Props) => {
         <div className="flex h-16 items-center justify-between border-b border-gray-700 px-4">
           <div className="flex items-center gap-2">
             <div className="flex h-8 w-8 items-center justify-center rounded bg-primary text-primary-foreground">
-              <Store className="h-4 w-4" />
+              <Truck className="h-4 w-4" />
             </div>
             <div>
-              <h1 className="text-lg font-bold text-white">{managerData?.restaurant?.restaurantName || "Loading..."}</h1>
-              <p className="text-xs text-gray-400">{managerData?.restaurant?.addressLine1 || "Loading..."}</p>
+              <h1 className="text-lg font-bold text-white">{shipperData?.restaurant?.restaurantName || "Loading..."}</h1>
+              <p className="text-xs text-gray-400">{shipperData?.restaurant?.addressLine1 || "Loading..."}</p>
             </div>
           </div>
           <button
@@ -114,35 +112,16 @@ const DashboardLayout = ({ children }: Props) => {
         <div className="flex-1 overflow-y-auto py-4">
           <NavGroup title="Main Menu">
             <NavItem
-              to="/manager/dashboard"
+              to="/shipper/dashboard"
               icon={LayoutDashboard}
               label="Dashboard"
-              isActive={isActive("/manager/dashboard")}
+              isActive={isActive("/shipper/dashboard")}
             />
-            {/* <NavItem to="/manager/orders" icon={ShoppingCart} label="Orders" isActive={isActive("/manager/orders")} /> */}
             <NavItem
-              to="/manager/payment"
-              icon={CreditCard}
-              label="Payments"
-              isActive={isActive("/manager/payment")}
-            />
-          </NavGroup>
-
-          <NavGroup title="Restaurant">
-            <NavItem
-              to="/manager/restaurant"
+              to="/shipper/orders"
               icon={Package}
-              label="My Restaurant"
-              isActive={isActive("/manager/restaurant")}
-            />
-          </NavGroup>
-
-          <NavGroup title="Sales Staff">
-            <NavItem 
-              to="/manager/salesstaff" 
-              icon={Calendar} 
-              label="Manage Sales Staffs" 
-              isActive={isActive("/manager/salesstaff")} 
+              label="Orders"
+              isActive={isActive("/shipper/orders")}
             />
           </NavGroup>
         </div>
@@ -154,7 +133,7 @@ const DashboardLayout = ({ children }: Props) => {
               {user?.picture ? (
                 <img 
                   src={user.picture} 
-                  alt={user.name || "Manager"} 
+                  alt={user.name || "Shipper"} 
                   className="h-full w-full rounded-full object-cover"
                 />
               ) : (
@@ -162,7 +141,7 @@ const DashboardLayout = ({ children }: Props) => {
               )}
             </div>
             <div className="flex-1 min-w-0">
-              <p className="truncate text-sm font-medium text-white">{user?.name || "Restaurant Manager"}</p>
+              <p className="truncate text-sm font-medium text-white">{user?.name || "Shipper"}</p>
               <p className="truncate text-xs text-gray-400">{user?.email || "Loading..."}</p>
             </div>
             <button 
@@ -191,7 +170,7 @@ const DashboardLayout = ({ children }: Props) => {
               {user?.picture ? (
                 <img 
                   src={user.picture} 
-                  alt={user.name || "Manager"} 
+                  alt={user.name || "Shipper"} 
                   className="h-full w-full rounded-full object-cover"
                 />
               ) : (
@@ -208,4 +187,4 @@ const DashboardLayout = ({ children }: Props) => {
   )
 }
 
-export default DashboardLayout
+export default ShipperLayout
