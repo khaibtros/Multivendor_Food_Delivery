@@ -60,33 +60,6 @@ const DetailsSection = () => {
           )}
         />
       </div>
-
-      <FormField
-        control={control}
-        name="deliveryPrice"
-        render={({ field }) => (
-          <FormItem className="max-w-[25%]">
-            <FormLabel>Delivery price (£)</FormLabel>
-            <FormControl>
-              <Input {...field} className="bg-white" placeholder="1.50" />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-      <FormField
-        control={control}
-        name="estimatedDeliveryTime"
-        render={({ field }) => (
-          <FormItem className="max-w-[25%]">
-            <FormLabel>Estimated Delivery Time (minutes)</FormLabel>
-            <FormControl>
-              <Input {...field} className="bg-white" placeholder="30" />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
     </div>
   );
 };

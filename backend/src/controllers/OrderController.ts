@@ -92,7 +92,7 @@ const createCheckoutSession = async (req: Request, res: Response) => {
     const totalAmount = lineItems.reduce(
       (total, item) => total + (item.price_data?.unit_amount || 0) * (item.quantity || 0),
       0
-    ) + restaurant.deliveryPrice;
+    );
 
     const newOrder = new Order({
       restaurant: restaurant,
@@ -121,7 +121,6 @@ const createCheckoutSession = async (req: Request, res: Response) => {
     const session = await createSession(
       lineItems,
       newOrder._id.toString(),
-      restaurant.deliveryPrice,
       restaurant._id.toString()
     );
 
@@ -255,23 +254,10 @@ const createLineItems = (
 const createSession = async (
   lineItems: Stripe.Checkout.SessionCreateParams.LineItem[],
   orderId: string,
-  deliveryPrice: number,
   restaurantId: string
 ) => {
   const sessionData = await STRIPE.checkout.sessions.create({
     line_items: lineItems,
-    shipping_options: [
-      {
-        shipping_rate_data: {
-          display_name: "Delivery",
-          type: "fixed_amount",
-          fixed_amount: {
-            amount: deliveryPrice,
-            currency: "gbp",
-          },
-        },
-      },
-    ],
     mode: "payment",
     metadata: {
       orderId,

@@ -37,18 +37,7 @@ const formSchema = z
     country: z.string({
       required_error: "country is required",
     }),
-    deliveryPrice: z.coerce
-      .number({
-        required_error: "delivery price is required",
-        invalid_type_error: "must be a valid number",
-      })
-      .min(0, "delivery price must be positive"),
-    estimatedDeliveryTime: z.coerce
-      .number({
-        required_error: "estimated delivery time is required",
-        invalid_type_error: "must be a valid number",
-      })
-      .min(1, "estimated delivery time must be at least 1 minute"),
+  
     cuisines: z.array(z.string()).nonempty({
       message: "please select at least one item",
     }),
@@ -142,11 +131,6 @@ const ManageRestaurantForm = ({ onSave, isLoading, restaurant }: Props) => {
       return;
     }
 
-    // price lowest domination of 100 = 100pence == 1GBP
-    const deliveryPriceFormatted = parseInt(
-      (restaurant.deliveryPrice / 100).toFixed(2)
-    );
-
     const menuItemsFormatted = restaurant.menuItems.map((item) => ({
       ...item,
       price: parseInt((item.price / 100).toFixed(2)),
@@ -154,7 +138,6 @@ const ManageRestaurantForm = ({ onSave, isLoading, restaurant }: Props) => {
 
     const updatedRestaurant = {
       ...restaurant,
-      deliveryPrice: deliveryPriceFormatted,
       menuItems: menuItemsFormatted,
     };
 
@@ -175,15 +158,6 @@ const ManageRestaurantForm = ({ onSave, isLoading, restaurant }: Props) => {
     if (formDataJson.description) {
       formData.append("description", formDataJson.description);
     }
-
-    formData.append(
-      "deliveryPrice",
-      (formDataJson.deliveryPrice * 100).toString()
-    );
-    formData.append(
-      "estimatedDeliveryTime",
-      formDataJson.estimatedDeliveryTime.toString()
-    );
 
     // Stringify arrays and objects before appending
     formData.append("cuisines", JSON.stringify(formDataJson.cuisines));

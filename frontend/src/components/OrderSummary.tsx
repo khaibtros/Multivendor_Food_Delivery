@@ -2,7 +2,6 @@ import { CartItem } from "@/pages/DetailPage";
 import { Restaurant } from "@/types";
 import { CardContent, CardHeader, CardTitle } from "./ui/card";
 import { Badge } from "./ui/badge";
-import { Separator } from "./ui/separator";
 import { Trash } from "lucide-react";
 
 type Props = {
@@ -11,16 +10,14 @@ type Props = {
   removeFromCart: (cartItem: CartItem) => void;
 };
 
-const OrderSummary = ({ restaurant, cartItems, removeFromCart }: Props) => {
+const OrderSummary = ({ cartItems, removeFromCart }: Props) => {
   const getTotalCost = () => {
     const totalInPence = cartItems.reduce(
       (total, cartItem) => total + cartItem.price * cartItem.quantity,
       0
     );
 
-    const totalWithDelivery = totalInPence + restaurant.deliveryPrice;
-
-    return (totalWithDelivery / 100).toFixed(2);
+    return (totalInPence / 100).toFixed(2);
   };
 
   return (
@@ -51,12 +48,7 @@ const OrderSummary = ({ restaurant, cartItems, removeFromCart }: Props) => {
             </span>
           </div>
         ))}
-        <Separator />
-        <div className="flex justify-between">
-          <span>Delivery</span>
-          <span>£{(restaurant.deliveryPrice / 100).toFixed(2)}</span>
-        </div>
-        <Separator />
+
       </CardContent>
     </>
   );

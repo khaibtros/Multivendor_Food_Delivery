@@ -89,8 +89,6 @@ const RestaurantApprovalsPage = () => {
                     <div>
                       <h3 className="font-medium mb-2">Business Details</h3>
                       <p>Cuisines: {restaurant.cuisines.join(", ")}</p>
-                      <p>Delivery Price: £{(restaurant.deliveryPrice / 100).toFixed(2)}</p>
-                      <p>Estimated Delivery Time: {restaurant.estimatedDeliveryTime} minutes</p>
                     </div>
                     <div className="flex gap-4">
                       <Button

@@ -14,34 +14,17 @@ const handleValidationErrors = async (
 };
 
 // Helper function to parse FormData fields
-const parseFormDataFields = (req: Request, res: Response, next: NextFunction) => {
-  try {
-    // Parse numeric fields
-    if (req.body.deliveryPrice) {
-      req.body.deliveryPrice = parseFloat(req.body.deliveryPrice);
-    }
-    if (req.body.estimatedDeliveryTime) {
-      req.body.estimatedDeliveryTime = parseInt(req.body.estimatedDeliveryTime, 10);
-    }
-
-    // Parse arrays
-    if (req.body.cuisines) {
-      req.body.cuisines = JSON.parse(req.body.cuisines);
-    }
-    if (req.body.menuItems) {
-      req.body.menuItems = JSON.parse(req.body.menuItems);
-    }
-    if (req.body.openingHours) {
-      req.body.openingHours = JSON.parse(req.body.openingHours);
-    }
-
-    next();
-  } catch (error) {
-    return res.status(400).json({ 
-      message: "Error parsing form data",
-      error: error instanceof Error ? error.message : "Unknown error"
-    });
+export const parseFormDataFields = (req: Request, res: Response, next: NextFunction) => {
+  if (req.body.cuisines) {
+    req.body.cuisines = JSON.parse(req.body.cuisines);
   }
+  if (req.body.menuItems) {
+    req.body.menuItems = JSON.parse(req.body.menuItems);
+  }
+  if (req.body.openingHours) {
+    req.body.openingHours = JSON.parse(req.body.openingHours);
+  }
+  next();
 };
 
 export const validateMyUserRequest = [
@@ -60,12 +43,6 @@ export const validateMyRestaurantRequest = [
   body("restaurantName").notEmpty().withMessage("Restaurant name is required"),
   body("city").notEmpty().withMessage("City is required"),
   body("country").notEmpty().withMessage("Country is required"),
-  body("deliveryPrice")
-    .isFloat({ min: 0 })
-    .withMessage("Delivery price must be a positive number"),
-  body("estimatedDeliveryTime")
-    .isInt({ min: 0 })
-    .withMessage("Estimated delivery time must be a positive integer"),
   body("cuisines")
     .isArray()
     .withMessage("Cuisines must be an array")

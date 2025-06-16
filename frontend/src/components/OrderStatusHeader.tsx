@@ -9,18 +9,6 @@ type Props = {
 };
 
 const OrderStatusHeader = ({ order }: Props) => {
-  const getExpectedDelivery = () => {
-    const created = new Date(order.createdAt);
-    created.setMinutes(
-      created.getMinutes() + order.restaurant.estimatedDeliveryTime
-    );
-
-    const hours = created.getHours();
-    const minutes = created.getMinutes();
-    const paddedMinutes = minutes < 10 ? `0${minutes}` : minutes;
-
-    return `${hours}:${paddedMinutes}`;
-  };
 
   const getOrderStatusInfo = () => {
     return (
@@ -62,10 +50,6 @@ const OrderStatusHeader = ({ order }: Props) => {
             <Badge variant="outline">
               {order.paymentMethod.toUpperCase()}
             </Badge>
-          </div>
-          <div className="flex items-center gap-2">
-            <span className="font-medium">Expected by:</span>
-            <span className="text-muted-foreground">{getExpectedDelivery()}</span>
           </div>
         </div>
       </div>
