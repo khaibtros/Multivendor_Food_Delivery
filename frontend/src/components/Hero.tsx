@@ -10,13 +10,6 @@ const Hero = () => {
         className="w-full h-[700px] border-none"
         title="Hero Section"
       ></iframe>
-      <Info />
-      {/* <JoinPlatform /> */}
-      <CardComponent />
-      {/* <PlatformFeatures />
-      <AppsInfo />
-      <OrderFavorites /> */}
-      <FAQ />
     </div>
   );
 };
