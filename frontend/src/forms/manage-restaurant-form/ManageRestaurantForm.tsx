@@ -121,6 +121,15 @@ const ManageRestaurantForm = ({ onSave, isLoading, restaurant }: Props) => {
   const form = useForm<RestaurantFormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
+      restaurantName: "",
+      city: "",
+      country: "",
+      addressLine1: "",
+      street: "",
+      ward: "",
+      district: "",
+      phoneNumber: "",
+      description: "",
       cuisines: [],
       menuItems: [{ name: "", price: 0 }],
     },

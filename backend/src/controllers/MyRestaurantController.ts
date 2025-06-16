@@ -103,11 +103,19 @@ const updateMyRestaurant = async (req: Request, res: Response) => {
     const oldImageUrl = restaurant.imageUrl;
     const oldMenuItemImages = restaurant.menuItems.map(item => item.imageUrl).filter((url): url is string => typeof url === 'string');
 
+    // Update all fields
     restaurant.restaurantName = req.body.restaurantName;
     restaurant.city = req.body.city;
     restaurant.country = req.body.country;
     restaurant.cuisines = req.body.cuisines;
     restaurant.menuItems = req.body.menuItems;
+    restaurant.phoneNumber = req.body.phoneNumber;
+    restaurant.description = req.body.description;
+    restaurant.addressLine1 = req.body.addressLine1;
+    restaurant.street = req.body.street;
+    restaurant.ward = req.body.ward;
+    restaurant.district = req.body.district;
+    restaurant.openingHours = req.body.openingHours;
     restaurant.lastUpdated = new Date();
 
     const files = req.files as Express.Multer.File[];

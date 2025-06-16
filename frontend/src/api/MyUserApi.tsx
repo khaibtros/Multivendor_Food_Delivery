@@ -80,7 +80,11 @@ export const useCreateMyUser = () => {
 
 type UpdateMyUserRequest = {
   name: string;
+  phone: string;
   addressLine1: string;
+  street: string;
+  ward: string;
+  district: string;
   city: string;
   country: string;
 };

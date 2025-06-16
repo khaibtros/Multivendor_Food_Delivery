@@ -20,6 +20,14 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 const formSchema = z.object({
   email: z.string().optional(),
   name: z.string().min(1, "Name is required"),
+  phone: z
+    .string({
+      required_error: "phone number is required",
+    })
+    .regex(
+      /^(\+?[0-9]{1,4}[\s-])?(?!0+\s+,?$)\d{10,11}$/,
+      "Please enter a valid phone number (e.g., 07123456789 or +44 7123456789)"
+    ),
   addressLine1: z.string().min(1, "Address Line 1 is required"),
   street: z.string().min(1, "Street is required"),
   ward: z.string().min(1, "Ward is required"),
@@ -61,14 +69,11 @@ const UserProfileForm = ({
       </CardHeader>
       <CardContent>
         <Form {...form}>
-          <form
-            onSubmit={form.handleSubmit(onSave)}
-            className="space-y-6"
-          >
+          <form onSubmit={form.handleSubmit(onSave)} className="space-y-6">
             <FormDescription className="text-base">
               View and change your profile information here
             </FormDescription>
-            
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <FormField
                 control={form.control}
@@ -89,6 +94,20 @@ const UserProfileForm = ({
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Name</FormLabel>
+                    <FormControl>
+                      <Input {...field} className="bg-white" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="phone"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Phone Number</FormLabel>
                     <FormControl>
                       <Input {...field} className="bg-white" />
                     </FormControl>
