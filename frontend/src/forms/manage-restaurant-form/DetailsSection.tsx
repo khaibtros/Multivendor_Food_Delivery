@@ -11,8 +11,6 @@ import { useFormContext } from "react-hook-form";
 import { Textarea } from "@/components/ui/textarea";
 
 const DetailsSection = () => {
-  console.log("render", useFormContext().formState.errors);
-
   const { control } = useFormContext();
   return (
     <div className="space-y-6">

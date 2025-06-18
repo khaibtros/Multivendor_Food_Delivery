@@ -27,23 +27,16 @@ const DAYS_OF_WEEK = [
 
 const formSchema = z
   .object({
-    restaurantName: z.string({
-      required_error: "restaurant name is required",
-    }),
-    city: z.string({
-      required_error: "city is required",
-    }),
-    country: z.string({
-      required_error: "country is required",
-    }),
-  
+    restaurantName: z.string().min(1, "Restaurant name is required"),
+    city: z.string().min(1, "City is required"),
+    country: z.string().min(1, "Country is required"),
     cuisines: z.array(z.string()).nonempty({
       message: "please select at least one item",
     }),
     menuItems: z.array(
       z.object({
         name: z.string().min(1, "name is required"),
-        price: z.coerce.number().min(0, "price must be positive"),
+        price: z.coerce.number().min(0.000001, "price must be positive"),
         imageUrl: z.string().optional(),
         imageFile: z.instanceof(File, { message: "image is required" }).optional(),
         toppings: z.array(
@@ -52,27 +45,22 @@ const formSchema = z
             options: z.array(
               z.object({
                 name: z.string().min(1, "option name is required"),
-                price: z.number().min(0, "price must be positive"),
+                price: z.coerce.number().min(0, "price cannot be negative"),
               })
             ).min(1, "at least one option is required"),
           })
         ).optional(),
+      }).refine((data) => data.imageUrl || data.imageFile, {
+        message: "Image is required for each menu item",
+        path: ["imageFile"],
       })
     ),
     imageUrl: z.string().optional(),
     imageFile: z.instanceof(File, { message: "image is required" }).optional(),
-    addressLine1: z.string({
-      required_error: "address line 1 is required",
-    }),
-    street: z.string({
-      required_error: "street is required",
-    }),
-    ward: z.string({
-      required_error: "ward is required",
-    }),
-    district: z.string({
-      required_error: "district is required",
-    }),
+    addressLine1: z.string().min(1, "address line 1 is required"),
+    street: z.string().min(1, "street is required"),
+    ward: z.string().min(1, "ward is required"),
+    district: z.string().min(1, "district is required"),
     phoneNumber: z
       .string({
         required_error: "phone number is required",
@@ -131,7 +119,7 @@ const ManageRestaurantForm = ({ onSave, isLoading, restaurant }: Props) => {
       description: "",
       cuisines: [],
       menuItems: [{ name: "", price: 0 }],
-      openingHours: [],
+      openingHours: [{ day: "", open: "", close: "" }],
     },
   });
 
@@ -142,7 +130,7 @@ const ManageRestaurantForm = ({ onSave, isLoading, restaurant }: Props) => {
 
     const menuItemsFormatted = restaurant.menuItems.map((item) => ({
       ...item,
-      price: parseInt((item.price / 100).toFixed(2)),
+      price: item.price,
     }));
 
     const updatedRestaurant = {
