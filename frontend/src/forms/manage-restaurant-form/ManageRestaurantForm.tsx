@@ -131,6 +131,7 @@ const ManageRestaurantForm = ({ onSave, isLoading, restaurant }: Props) => {
       description: "",
       cuisines: [],
       menuItems: [{ name: "", price: 0 }],
+      openingHours: [],
     },
   });
 
@@ -221,7 +222,6 @@ const ManageRestaurantForm = ({ onSave, isLoading, restaurant }: Props) => {
         onSubmit={form.handleSubmit(onSubmit)}
         className="space-y-8 bg-gray-50 p-10 rounded-lg"
       >
-        {renderStatusAlert()}
         <DetailsSection />
         <Separator />
         <OpeningHoursSection />
@@ -232,6 +232,7 @@ const ManageRestaurantForm = ({ onSave, isLoading, restaurant }: Props) => {
         <Separator />
         <ImageSection />
         {isLoading ? <LoadingButton /> : <Button type="submit">Submit</Button>}
+        {renderStatusAlert()}
       </form>
     </Form>
   );

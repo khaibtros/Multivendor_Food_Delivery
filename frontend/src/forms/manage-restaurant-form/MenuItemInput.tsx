@@ -409,7 +409,7 @@ const MenuItemInput = ({ index, removeMenuItem }: Props) => {
           </p>
         </div>
 
-        <div className="flex flex-col gap-8 md:w-[50%]">
+        <div className="flex flex-col gap-8 md:w-[30%]">
           {(existingImageUrl || isUploading) && (
             <AspectRatio ratio={16 / 9}>
               <img

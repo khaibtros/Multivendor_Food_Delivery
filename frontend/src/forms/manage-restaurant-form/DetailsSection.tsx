@@ -11,6 +11,8 @@ import { useFormContext } from "react-hook-form";
 import { Textarea } from "@/components/ui/textarea";
 
 const DetailsSection = () => {
+  console.log("render", useFormContext().formState.errors);
+
   const { control } = useFormContext();
   return (
     <div className="space-y-6">
@@ -24,7 +26,6 @@ const DetailsSection = () => {
       {/* Basic Information */}
       <div className="space-y-4">
         <h3 className="text-lg font-semibold">Basic Information</h3>
-        
         {/* Restaurant Name */}
         <FormField
           control={control}
@@ -97,15 +98,12 @@ const DetailsSection = () => {
               </FormItem>
             )}
           />
-        </div>
-      </div>
 
-      <div className="flex gap-4">
           <FormField
             control={control}
             name="city"
             render={({ field }) => (
-              <FormItem className="flex-1">
+              <FormItem>
                 <FormLabel>City</FormLabel>
                 <FormControl>
                   <Input {...field} className="bg-white" placeholder="Enter city" />
@@ -114,11 +112,12 @@ const DetailsSection = () => {
               </FormItem>
             )}
           />
+
           <FormField
             control={control}
             name="country"
             render={({ field }) => (
-              <FormItem className="flex-1">
+              <FormItem>
                 <FormLabel>Country</FormLabel>
                 <FormControl>
                   <Input {...field} className="bg-white" placeholder="Enter country" />
@@ -128,6 +127,8 @@ const DetailsSection = () => {
             )}
           />
         </div>
+      </div>
+      
 
       {/* Contact Information */}
       <div className="space-y-4">
