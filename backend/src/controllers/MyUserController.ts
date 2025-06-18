@@ -31,16 +31,7 @@ const createCurrentUser = async (req: Request, res: Response) => {
 
     const newUser = new User({
       auth0Id,
-      email,
-      name: email.split('@')[0], // Default name from email
-      role: "user", // Default role
-      phone: "", // Empty phone number
-      addressLine1: "",
-      street: "",
-      ward: "",
-      district: "",
-      city: "",
-      country: ""
+      email
     });
 
     await newUser.save();

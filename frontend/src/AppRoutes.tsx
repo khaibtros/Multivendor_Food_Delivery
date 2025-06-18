@@ -22,6 +22,7 @@ import ManageSellersPage from "@/pages/manager/ManageSellersPage";
 import ShipperLoginPage from "@/pages/shipper/ShipperLoginPage";
 import ShipperOrdersPage from "@/pages/shipper/ShipperOrdersPage";
 import ManageShippersPage from "@/pages/manager/ManageShippersPage";
+import OrderHistoryPage from "./pages/OrderHistoryPage";
 
 const AppRoutes = () => {
   return (
@@ -131,6 +132,14 @@ const AppRoutes = () => {
           element={
             <Layout>
               <UserProfilePage />
+            </Layout>
+          }
+        />
+         <Route
+          path="/order-history"
+          element={
+            <Layout>
+              <OrderHistoryPage/>
             </Layout>
           }
         />
