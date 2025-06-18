@@ -5,6 +5,7 @@ import { useGetMyUser } from "@/api/MyUserApi";
 import { useGetManagerRestaurant } from "@/api/manager/ManagerApi";
 import { useGetSellerRestaurant } from "@/api/seller/SellerApi";
 import { useGetShipperRestaurant } from "@/api/shipper/ShipperApi";
+import { useVerifyAdminAccess } from "@/api/admin/AdminApi";
 
 // Base protected route that just checks authentication
 export const ProtectedRoute = () => {
@@ -33,9 +34,9 @@ export const ProtectedRoute = () => {
 // Admin protected route
 export const AdminProtectedRoute = () => {
   const { isAuthenticated, isLoading } = useAuth0();
-  const adminUser = localStorage.getItem("adminUser");
+  const { data: adminData, isLoading: isLoadingAdmin } = useVerifyAdminAccess();
 
-  if (isLoading) {
+  if (isLoading || isLoadingAdmin) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center space-y-4">
@@ -47,7 +48,7 @@ export const AdminProtectedRoute = () => {
     );
   }
 
-  if (!isAuthenticated || !adminUser) {
+  if (!isAuthenticated || !adminData) {
     return <Navigate to="/admin" replace />;
   }
 
