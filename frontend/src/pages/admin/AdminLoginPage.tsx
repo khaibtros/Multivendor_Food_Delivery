@@ -17,7 +17,7 @@ const AdminLoginPage = () => {
       if (isAuthenticated && !isLoading) {
         try {
           // Force a token refresh to get updated role information
-          const token = await getAccessTokenSilently({
+          await getAccessTokenSilently({
             authorizationParams: {
               prompt: "login"
             }
