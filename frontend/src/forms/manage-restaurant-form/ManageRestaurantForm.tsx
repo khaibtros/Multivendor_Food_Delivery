@@ -7,7 +7,6 @@ import { Separator } from "@/components/ui/separator";
 import CuisinesSection from "./CuisinesSection";
 import MenuSection from "./MenuSection";
 import ImageSection from "./ImageSection";
-import AdditionalDetailsSection from "./AdditionalDetailsSection";
 import OpeningHoursSection from "./OpeningHoursSection";
 import LoadingButton from "@/components/LoadingButton";
 import { Button } from "@/components/ui/button";
@@ -224,8 +223,6 @@ const ManageRestaurantForm = ({ onSave, isLoading, restaurant }: Props) => {
       >
         {renderStatusAlert()}
         <DetailsSection />
-        <Separator />
-        <AdditionalDetailsSection />
         <Separator />
         <OpeningHoursSection />
         <Separator />
