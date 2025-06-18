@@ -198,7 +198,20 @@ const MenuItemInput = ({ index, removeMenuItem }: Props) => {
                 Price (£) <FormMessage />
               </FormLabel>
               <FormControl>
-                <Input {...field} placeholder="8.00" className="bg-white" />
+                <Input 
+                  {...field}
+                  value={field.value?.toString() || ''}
+                  placeholder="8.00" 
+                  className="bg-white"
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    // Only allow numbers and up to 2 decimal places
+                    if (/^\d*\.?\d{0,2}$/.test(value) || value === '') {
+                      const numericValue = value === '' ? '' : Number(value);
+                      field.onChange(numericValue);
+                    }
+                  }}
+                />
               </FormControl>
             </FormItem>
           )}
@@ -415,7 +428,13 @@ const MenuItemInput = ({ index, removeMenuItem }: Props) => {
               <img
                 src={existingImageUrl}
                 className="rounded-md object-cover h-full w-full"
-                alt={`${watch(`menuItems.${index}.name`)} image`}
+                alt={`${watch(`menuItems.${index}.name`) || 'Menu item'} image`}
+                onError={(e) => {
+                  // Handle image loading error
+                  const target = e.target as HTMLImageElement;
+                  target.src = ''; // Clear invalid image
+                  setValue(`menuItems.${index}.imageUrl`, '');
+                }}
               />
             </AspectRatio>
           )}

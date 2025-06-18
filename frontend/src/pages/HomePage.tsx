@@ -1,5 +1,4 @@
 import CardComponent from "@/components/HomeScreen/CardComponent";
-import FAQ from "@/components/HomeScreen/FAQ";
 import Info from "@/components/HomeScreen/Info";
 
 const HomePage = () => {
@@ -12,7 +11,7 @@ const HomePage = () => {
         {/* <PlatformFeatures />
       <AppsInfo />
       <OrderFavorites /> */}
-        <FAQ />
+        {/* <FAQ /> */}
       </div>
     </div>
   );
