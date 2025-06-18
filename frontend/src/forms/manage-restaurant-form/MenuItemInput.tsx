@@ -279,7 +279,7 @@ const MenuItemInput = ({ index, removeMenuItem }: Props) => {
                                   placeholder="Option Name"
                                 />
                                 <Input
-                                  value={option.price === 0 ? "" : option.price.toString()}
+                                  value={option.price?.toString() ?? ""}
                                   onChange={(e) => {
                                     const newToppings = [...(tempToppings.length > 0 ? tempToppings : field.value || [])];
                                     newToppings[categoryIndex].options[optionIndex] = {
