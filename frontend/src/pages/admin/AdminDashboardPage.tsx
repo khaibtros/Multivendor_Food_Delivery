@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Users, Store, CheckCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import AdminHeader from "@/components/admin/AdminHeader";
+import { useVerifyAdminAccess } from "@/api/admin/AdminApi";
 
 interface AdminUser {
   id: string;
@@ -14,18 +15,31 @@ interface AdminUser {
 const AdminDashboardPage = () => {
   const [adminUser, setAdminUser] = useState<AdminUser | null>(null);
   const navigate = useNavigate();
+  const { data: adminData } = useVerifyAdminAccess();
 
   useEffect(() => {
-    const storedAdmin = localStorage.getItem("adminUser");
-    if (!storedAdmin) {
+    if (adminData?.user) {
+      setAdminUser({
+        id: adminData.user._id,
+        email: adminData.user.email,
+        name: adminData.user.name || adminData.user.email,
+        role: adminData.user.role
+      });
+    } else {
       navigate("/admin");
-      return;
     }
-    setAdminUser(JSON.parse(storedAdmin));
-  }, [navigate]);
+  }, [adminData, navigate]);
 
   if (!adminUser) {
-    return null;
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center space-y-4">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
+          <h2 className="text-xl font-semibold">Loading...</h2>
+          <p className="text-muted-foreground">Please wait while we load your dashboard.</p>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -63,15 +77,14 @@ const AdminDashboardPage = () => {
                 <Users className="h-6 w-6 text-purple-600" />
               </div>
               <div>
-                <h3 className="text-lg font-semibold text-gray-900">Users</h3>
-                <p className="text-sm text-gray-500">Manage user accounts and permissions</p>
+                <h3 className="text-lg font-semibold text-gray-900">User Management</h3>
+                <p className="text-sm text-gray-500">Manage user roles and permissions</p>
               </div>
             </div>
             <div className="mt-6">
               <Button
                 onClick={() => navigate("/admin/users")}
                 className="w-full"
-                variant="outline"
               >
                 Manage Users
               </Button>
@@ -93,7 +106,6 @@ const AdminDashboardPage = () => {
               <Button
                 onClick={() => navigate("/admin/restaurants")}
                 className="w-full"
-                variant="outline"
               >
                 View Restaurants
               </Button>
