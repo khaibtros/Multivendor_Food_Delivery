@@ -39,13 +39,18 @@ export const jwtParse = async (
     const decoded = jwt.decode(token) as jwt.JwtPayload;
     const auth0Id = decoded.sub;
 
+    if (!auth0Id) {
+      console.error("No auth0Id found in token");
+      return res.sendStatus(401);
+    }
+
     const user = await User.findOne({ auth0Id });
 
     if (!user) {
       return res.sendStatus(401);
     }
 
-    req.auth0Id = auth0Id as string;
+    req.auth0Id = auth0Id;
     req.userId = user._id.toString();
     req.user = { role: user.role };
     next();
