@@ -66,6 +66,11 @@ export const searchRestaurant = async (req: Request, res: Response) => {
         { restaurantName: searchRegex },
         { cuisines: { $in: [searchRegex] } },
         { "menuItems.name": searchRegex },
+        { ward: searchRegex },
+        { district: searchRegex },
+        { city: searchRegex },
+        { addressLine1: searchRegex },
+        { street: searchRegex },
       ];
     }
 
