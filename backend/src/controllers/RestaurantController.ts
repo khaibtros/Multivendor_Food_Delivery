@@ -186,6 +186,7 @@ export const approveRestaurant = async (req: Request, res: Response) => {
     const user = await User.findById(restaurant.user);
     if (user) {
       user.role = "manager";
+      user.restaurant = restaurant._id;
       await user.save();
     }
 

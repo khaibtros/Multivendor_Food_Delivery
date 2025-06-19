@@ -3,7 +3,14 @@ import Layout from "./layouts/layout";
 import HomePage from "./pages/HomePage";
 import AuthCallbackPage from "./pages/AuthCallbackPage";
 import UserProfilePage from "@/pages/UserProfilePage";
-import { AdminProtectedRoute, ManagerProtectedRoute, ProtectedRoute, SellerProtectedRoute, ShipperProtectedRoute } from "./auth/ProtectedRoute";
+import {
+  AdminProtectedRoute,
+  ManagerProtectedRoute,
+  ProtectedRoute,
+  UserProtectedRoute,
+  SellerProtectedRoute,
+  ShipperProtectedRoute,
+} from "./auth/ProtectedRoute";
 import ManageRestaurantPage from "./pages/ManageRestaurantPage";
 import SearchPage from "./pages/SearchPage";
 import DetailPage from "./pages/DetailPage";
@@ -36,14 +43,17 @@ const AppRoutes = () => {
         }
       />
       <Route path="/auth-callback" element={<AuthCallbackPage />} />
-      
+
       {/* Admin Routes */}
       <Route path="/admin" element={<AdminLoginPage />} />
       <Route element={<AdminProtectedRoute />}>
         <Route path="/admin/dashboard" element={<AdminDashboardPage />} />
-        <Route path="/admin/restaurant-approvals" element={<RestaurantApprovalsPage />} />
+        <Route
+          path="/admin/restaurant-approvals"
+          element={<RestaurantApprovalsPage />}
+        />
       </Route>
-      
+
       {/* Manager Routes */}
       <Route path="/manager" element={<ManagerLoginPage />} />
       <Route element={<ManagerProtectedRoute />}>
@@ -135,14 +145,17 @@ const AppRoutes = () => {
             </Layout>
           }
         />
-         <Route
+        <Route
           path="/order-history"
           element={
             <Layout>
-              <OrderHistoryPage/>
+              <OrderHistoryPage />
             </Layout>
           }
         />
+      </Route>
+
+      <Route element={<UserProtectedRoute />}>
         <Route
           path="/manage-restaurant"
           element={
