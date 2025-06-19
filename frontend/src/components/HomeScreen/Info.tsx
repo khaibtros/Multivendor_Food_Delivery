@@ -1,5 +1,6 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
+import SellerIcon from "../../assets/icons/SellerIcon.svg";
 
 const Info: React.FC = () => {
   const navigate = useNavigate();
@@ -29,22 +30,12 @@ const Info: React.FC = () => {
       <div className="flex flex-wrap justify-center gap-[20px]">
         <button
           className="bg-[#4caf50] text-white px-6 py-2 rounded hover:bg-[#43a047]"
-          onClick={() => navigate("/becomeavendor")}
+          onClick={() => navigate("/manage-restaurant")}
         >
           Register Restaurant
         </button>
-        <button
-          className="bg-[#ffc107] text-black px-6 py-2 rounded hover:bg-[#ffb300]"
-          onClick={() => navigate("/becomearider")}
-        >
-          Sign Up as Rider
-        </button>
-        <button
-          className="bg-[#2196f3] text-white px-6 py-2 rounded hover:bg-[#1e88e5]"
-          onClick={() => navigate("/restaurant-list")}
-        >
-          Order Food Now
-        </button>
+        
+        
       </div>
     </div>
   );
