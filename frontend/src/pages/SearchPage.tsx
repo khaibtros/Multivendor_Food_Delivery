@@ -4,7 +4,7 @@ import PaginationSelector from "@/components/PaginationSelector";
 import SearchBar, { SearchForm } from "@/components/SearchBar";
 import SearchResultCard from "@/components/SearchResultCard";
 import SearchResultInfo from "@/components/SearchResultInfo";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { Restaurant } from "@/types/index";
 
@@ -23,6 +23,15 @@ const SearchPage = () => {
     selectedCuisines: [],
     sortOption: "bestMatch",
   });
+
+  useEffect(() => {
+    setSearchState({
+      searchQuery: "",
+      page: 1,
+      selectedCuisines: [],
+      sortOption: "bestMatch",
+    });
+  }, [city]);
 
   const [isExpanded, setIsExpanded] = useState<boolean>(false);
 
@@ -68,7 +77,7 @@ const SearchPage = () => {
   };
 
   if (isLoading) {
-    <span>Loading ...</span>;
+    return <span>Loading ...</span>;
   }
 
   if (!results?.data || !city) {
@@ -76,7 +85,7 @@ const SearchPage = () => {
   }
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-[250px_1fr] gap-5">
+    <div key={city} className="grid grid-cols-1 lg:grid-cols-[250px_1fr] gap-5">
       <div id="cuisines-list">
         <CuisineFilter
           selectedCuisines={searchState.selectedCuisines}

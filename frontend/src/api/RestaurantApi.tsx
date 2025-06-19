@@ -51,7 +51,7 @@ export const useSearchRestaurants = (
   };
 
   const { data: results, isLoading } = useQuery(
-    ["searchRestaurants", searchState],
+    ["searchRestaurants", searchState, city],
     createSearchRequest,
     { enabled: !!city }
   );

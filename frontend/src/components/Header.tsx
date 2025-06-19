@@ -24,7 +24,7 @@ const Header = () => {
           </Link>
           <div className="flex-1 max-w-2xl mx-4">
             <SearchBar
-              placeHolder="Enter your location (Ward, District, City)"
+              placeHolder="Enter your city"
               onSubmit={handleSearchSubmit}
             />
           </div>
