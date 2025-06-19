@@ -28,7 +28,7 @@ export const getRestaurant = async (req: Request, res: Response) => {
 
 export const searchRestaurant = async (req: Request, res: Response) => {
   try {
-    const city = req.params.city;
+    const location = req.params.location;
 
     const searchQuery = (req.query.searchQuery as string) || "";
     const selectedCuisines = (req.query.selectedCuisines as string) || "";
@@ -39,39 +39,57 @@ export const searchRestaurant = async (req: Request, res: Response) => {
       status: "approved", // Only show approved restaurants
     };
 
-    query["city"] = new RegExp(city, "i");
-    const cityCheck = await Restaurant.countDocuments(query);
-    if (cityCheck === 0) {
-      return res.status(404).json({
-        data: [],
-        pagination: {
-          total: 0,
-          page: 1,
-          pages: 1,
-        },
-      });
+    // Location filter (city, district, ward)
+    if (location) {
+      const locationRegex = new RegExp(location, "i");
+      query["$or"] = [
+        { city: locationRegex },
+        { district: locationRegex },
+        { ward: locationRegex },
+      ];
     }
 
+    // Cuisine filter
     if (selectedCuisines) {
       const cuisinesArray = selectedCuisines
         .split(",")
         .map((cuisine) => new RegExp(cuisine, "i"));
-
       query["cuisines"] = { $all: cuisinesArray };
     }
 
+    // Search query filter (AND with location)
     if (searchQuery) {
       const searchRegex = new RegExp(searchQuery, "i");
-      query["$or"] = [
-        { restaurantName: searchRegex },
-        { cuisines: { $in: [searchRegex] } },
-      ];
+      // If location is present, combine with $and
+      if (query["$or"]) {
+        query = {
+          $and: [
+            { $or: query["$or"] },
+            {
+              $or: [
+                { restaurantName: searchRegex },
+                { cuisines: { $in: [searchRegex] } },
+              ],
+            },
+          ],
+          status: "approved",
+        };
+        if (selectedCuisines) {
+          query.cuisines = { $all: selectedCuisines
+            .split(",")
+            .map((cuisine) => new RegExp(cuisine, "i")) };
+        }
+      } else {
+        query["$or"] = [
+          { restaurantName: searchRegex },
+          { cuisines: { $in: [searchRegex] } },
+        ];
+      }
     }
 
     const pageSize = 10;
     const skip = (page - 1) * pageSize;
 
-    // sortOption = "lastUpdated"
     const restaurants = await Restaurant.find(query)
       .sort({ [sortOption]: 1 })
       .skip(skip)

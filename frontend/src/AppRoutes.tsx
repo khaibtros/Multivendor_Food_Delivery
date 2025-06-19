@@ -111,7 +111,7 @@ const AppRoutes = () => {
 
       {/* Public Routes */}
       <Route
-        path="/search/:city"
+        path="/search/:location"
         element={
           <Layout showHero={false}>
             <SearchPage />

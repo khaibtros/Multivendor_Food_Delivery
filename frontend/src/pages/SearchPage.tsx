@@ -16,7 +16,7 @@ export type SearchState = {
 };
 
 const SearchPage = () => {
-  const { city } = useParams();
+  const { location } = useParams();
   const [searchState, setSearchState] = useState<SearchState>({
     searchQuery: "",
     page: 1,
@@ -31,11 +31,11 @@ const SearchPage = () => {
       selectedCuisines: [],
       sortOption: "bestMatch",
     });
-  }, [city]);
+  }, [location]);
 
   const [isExpanded, setIsExpanded] = useState<boolean>(false);
 
-  const { results, isLoading } = useSearchRestaurants(searchState, city);
+  const { results, isLoading } = useSearchRestaurants(searchState, location);
 
   // const setSortOption = (sortOption: string) => {
   //   setSearchState((prevState) => ({
@@ -80,12 +80,12 @@ const SearchPage = () => {
     return <span>Loading ...</span>;
   }
 
-  if (!results?.data || !city) {
+  if (!results?.data || !location) {
     return <span>No results found</span>;
   }
 
   return (
-    <div key={city} className="grid grid-cols-1 lg:grid-cols-[250px_1fr] gap-5">
+    <div key={location} className="grid grid-cols-1 lg:grid-cols-[250px_1fr] gap-5">
       <div id="cuisines-list">
         <CuisineFilter
           selectedCuisines={searchState.selectedCuisines}
@@ -104,7 +104,7 @@ const SearchPage = () => {
           onReset={resetSearch}
         />
         <div className="flex justify-between flex-col gap-3 lg:flex-row">
-          <SearchResultInfo total={results.pagination.total} city={city} />
+          <SearchResultInfo total={results.pagination.total} city={location} />
         </div>
 
         {results.data.map((restaurant: Restaurant) => (

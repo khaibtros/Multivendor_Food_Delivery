@@ -30,7 +30,7 @@ export const useGetRestaurant = (restaurantId?: string) => {
 
 export const useSearchRestaurants = (
   searchState: SearchState,
-  city?: string
+  location?: string
 ) => {
   const createSearchRequest = async (): Promise<RestaurantSearchResponse> => {
     const params = new URLSearchParams();
@@ -40,7 +40,7 @@ export const useSearchRestaurants = (
     params.set("sortOption", searchState.sortOption);
 
     const response = await fetch(
-      `${API_BASE_URL}/api/restaurant/search/${city}?${params.toString()}`
+      `${API_BASE_URL}/api/restaurant/search/${location}?${params.toString()}`
     );
 
     if (!response.ok) {
@@ -51,9 +51,9 @@ export const useSearchRestaurants = (
   };
 
   const { data: results, isLoading } = useQuery(
-    ["searchRestaurants", searchState, city],
+    ["searchRestaurants", searchState, location],
     createSearchRequest,
-    { enabled: !!city }
+    { enabled: !!location }
   );
 
   return {

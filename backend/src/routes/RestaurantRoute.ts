@@ -16,7 +16,7 @@ import { checkRole } from "../middleware/checkRole";
 const router = express.Router();
 
 // Public routes
-router.get("/search/:city", searchRestaurant);
+router.get("/search/:location", searchRestaurant);
 router.get("/", getRestaurants);
 router.get("/:restaurantId", getRestaurantById);
 
