@@ -1,16 +1,21 @@
 import { cuisineList } from "@/config/restaurant-options-config";
 import { Label } from "./ui/label";
-import { Check } from "lucide-react";
+import { Check, ChevronDown, ChevronUp } from "lucide-react";
 import { ChangeEvent } from "react";
+import { Button } from "./ui/button";
 
 type Props = {
   onChange: (cuisines: string[]) => void;
   selectedCuisines: string[];
+  isExpanded: boolean;
+  onExpandedClick: () => void;
 };
 
 const CuisineFilter = ({
   onChange,
   selectedCuisines,
+  isExpanded,
+  onExpandedClick,
 }: Props) => {
   const handleCuisinesChange = (event: ChangeEvent<HTMLInputElement>) => {
     const clickedCuisine = event.target.value;
@@ -39,6 +44,7 @@ const CuisineFilter = ({
 
       <div className="space-y-2 flex flex-col">
         {cuisineList
+          .slice(0, isExpanded ? cuisineList.length : 7)
           .map((cuisine) => {
             const isSelected = selectedCuisines.includes(cuisine);
             return (
@@ -65,6 +71,22 @@ const CuisineFilter = ({
               </div>
             );
           })}
+
+        <Button
+          onClick={onExpandedClick}
+          variant="link"
+          className="mt-4 flex-1"
+        >
+          {isExpanded ? (
+            <span className="flex flex-row items-center">
+              View Less <ChevronUp />
+            </span>
+          ) : (
+            <span className="flex flex-row items-center">
+              View More <ChevronDown />
+            </span>
+          )}
+        </Button>
       </div>
     </>
   );

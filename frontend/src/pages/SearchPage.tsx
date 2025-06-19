@@ -28,13 +28,13 @@ const SearchPage = () => {
 
   const { results, isLoading } = useSearchRestaurants(searchState, city);
 
-  const setSortOption = (sortOption: string) => {
-    setSearchState((prevState) => ({
-      ...prevState,
-      sortOption,
-      page: 1,
-    }));
-  };
+  // const setSortOption = (sortOption: string) => {
+  //   setSearchState((prevState) => ({
+  //     ...prevState,
+  //     sortOption,
+  //     page: 1,
+  //   }));
+  // };
 
   const setSelectedCuisines = (selectedCuisines: string[]) => {
     setSearchState((prevState) => ({

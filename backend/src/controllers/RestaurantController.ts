@@ -36,7 +36,7 @@ export const searchRestaurant = async (req: Request, res: Response) => {
     const page = parseInt(req.query.page as string) || 1;
 
     let query: any = {
-      status: "approved" // Only show approved restaurants
+      status: "approved", // Only show approved restaurants
     };
 
     query["city"] = new RegExp(city, "i");
@@ -65,7 +65,6 @@ export const searchRestaurant = async (req: Request, res: Response) => {
       query["$or"] = [
         { restaurantName: searchRegex },
         { cuisines: { $in: [searchRegex] } },
-        { "menuItems.name": searchRegex },
       ];
     }
 
@@ -115,14 +114,14 @@ export const getPendingRestaurants = async (req: Request, res: Response) => {
     res.json({
       status: "success",
       data: restaurants,
-      message: "Pending restaurants fetched successfully"
+      message: "Pending restaurants fetched successfully",
     });
   } catch (error) {
     console.log(error);
-    res.status(500).json({ 
+    res.status(500).json({
       status: "error",
       message: "Error fetching pending restaurants",
-      data: null
+      data: null,
     });
   }
 };
@@ -194,14 +193,14 @@ export const approveRestaurant = async (req: Request, res: Response) => {
     res.json({
       status: "success",
       data: restaurant,
-      message: "Restaurant approved and user role updated to manager"
+      message: "Restaurant approved and user role updated to manager",
     });
   } catch (error) {
     console.log(error);
-    res.status(500).json({ 
+    res.status(500).json({
       status: "error",
       message: "Error approving restaurant",
-      data: null
+      data: null,
     });
   }
 };
@@ -256,7 +255,9 @@ export const updateRestaurant = async (req: AuthRequest, res: Response) => {
 
   // Check if user is the owner
   if (restaurant.user.toString() !== req.userId) {
-    return res.status(403).json({ message: "Not authorized to update this restaurant" });
+    return res
+      .status(403)
+      .json({ message: "Not authorized to update this restaurant" });
   }
 
   // Only set status to pending if it's a new restaurant (first submission)
@@ -284,7 +285,9 @@ export const deleteRestaurant = async (req: AuthRequest, res: Response) => {
 
   // Check if user is the owner or admin
   if (restaurant.user.toString() !== req.userId && req.user?.role !== "admin") {
-    return res.status(403).json({ message: "Not authorized to delete this restaurant" });
+    return res
+      .status(403)
+      .json({ message: "Not authorized to delete this restaurant" });
   }
 
   await Restaurant.findByIdAndDelete(restaurantId);
